@@ -1,0 +1,519 @@
+[!]	<!--HAS_WEBDNA_TAGS-->
+	<filename>brainutility.dna</filename>
+
+[/!]
+[include ../library/brainutility.lib]
+<html><head>
+	<title>BrainUtility Library Unit Testing</title>
+	<style>
+	table {
+		border-collapse:collapse;
+	}
+	td {
+		border:1px solid #999;
+		padding:2px;
+		vertical-align:top;
+	}
+	button {
+		font-size:16px;
+	}
+	.success {
+		background-color:#dfd;
+	}
+	.failure {
+		background-color:#fdd;
+	}
+	</style>
+	<script language="javascript">
+	function checkAll(containerid, checked) {
+		var checks = document.querySelectorAll('#' + containerid + ' input[type="checkbox"]');
+		for(var i =0; i< checks.length;i++){
+			var check = checks[i];
+			if(!check.disabled){
+				check.checked = checked;
+			}
+		}
+	}
+	</script>
+</head><body>
+<h1>BrainUtility Library Unit Testing</h1>
+<h2>BrainUtility Version: [butVersion]</h2>
+[text]init=
+
+[table name=_Tests&fields=test,label,code,result][raw]
+butTrue	value	[butTrue]	1=1
+butTrue	showif	[showif [butTrue]]SHOW[/showif]	SHOW
+butTrue	hideif	[hideif [butTrue]]HIDE[/hideif]	
+butTrue	if	[if [butTrue]][then]THEN[/then][else]ELSE[/else][/if]	THEN
+
+butFalse	value	[butFalse]	1=0
+butFalse	showif	[showif [butFalse]]SHOW[/showif]	
+butFalse	hideif	[hideif [butFalse]]HIDE[/hideif]	HIDE
+butFalse	if	[if [butFalse]][then]THEN[/then][else]ELSE[/else][/if]	ELSE
+
+butToday	Number	[butToday]	[/raw][math]{[date]}[/math][raw]
+butToday	Formatted	[butToday %A, %m/%d/%Y]	[/raw][date %A, %m/%d/%Y][raw]
+
+butNow	Number	[butNow]	[/raw][math]{[time]}[/math][raw]
+butNow	Formatted	[butNow %I:%M %p]	[/raw][time %I:%M %p][raw]
+
+butFunctionParam	value only	[butFunctionParam name=value&params=[url]value=ONLY[/url]]	ONLY
+butFunctionParam	value first	[butFunctionParam name=value&params=[url]value=FIRST&two=2[/url]]	FIRST
+butFunctionParam	value middle	[butFunctionParam name=value&params=[url]one=1&value=MIDDLE&three=3[/url]]	MIDDLE
+butFunctionParam	value last	[butFunctionParam name=value&params=[url]one=1&two=2&value=LAST[/url]]	LAST
+butFunctionParam	value none	[butFunctionParam name=value&params=[url]one=1&two=2[/url]]	
+butFunctionParam	value default	[butFunctionParam name=value&params=[url]one=1&two=2[/url]&default=DEFAULT]	DEFAULT
+
+butFunctionParamList	none	[butFunctionParamList]	
+butFunctionParamList	one	[butFunctionParamList p1=one]	p1
+butFunctionParamList	two	[butFunctionParamList p1=one&p2=two]	p1,p2
+butFunctionParamList	five	[butFunctionParamList p1=one&p2=two&p3=&p4=four&p5=five]	p1,p2,p3,p4,p5
+
+butLineEnder	platform(linux)	[butLineEnder]	##0A
+butLineEnder	Mac	[butLineEnder Mac]	##0D
+butLineEnder	System=Mac	[butLineEnder system=Mac]	##0D
+butLineEnder	Windows	[butLineEnder Windows]	##0D##0A
+butLineEnder	Unix	[butLineEnder Unix]	##0A
+
+butMin	direct	[butMin 8,20,57,1234]	8
+butMin	valuelist	[butMin valueList=8,20,57,1234]	8
+butMin	Alpha Values	[butMin valueList=8,20,57,1234&alpha=T]	1234
+butMin	Numeric Bad	[butMin valueList=10day,eat7,4chan,hello&alpha=F]	0
+butMin	Numeric Good	[butMin valueList=10day,7eat7,4chan&alpha=F]	4
+butMin	Delimiters Any	[butMin valueList=One day, for fun, I had one "apple"&alpha=T]	"apple"
+butMin	Delimiters Comma	[butMin valueList=One day, for fun, I had one "apple"&alpha=T&delimiters=,]	 for fun
+
+butMax	direct	[butMax 8,20,57,1234]	1234
+butMax	valuelist	[butMax valueList=8,20,57,1234]	1234
+butMax	Alpha Values	[butMax valueList=8,20,57,1234&alpha=T]	8
+butMax	Numeric Bad	[butMax valueList=10day,eat7,4chan,hello&alpha=F]	10
+butMax	Numeric Good	[butMax valueList=10day,77eat7,4chan&alpha=F]	77
+butMax	Delimiters Any	[butMax valueList=One day, for fun, I had one "apple"&alpha=T]	One
+butMax	Delimiters Comma	[butMax valueList=One day, for fun, I had one "apple"&alpha=T&delimiters=,]	One day
+
+butInc	direct	[text scope=global]xx=2[/text][butInc xx][xx]	3
+butInc	TextVar	[butInc textVar=xx][xx]	4
+butInc	TextVar By 4	[butInc textVar=xx&by=4][xx]	8
+butInc	MathVar	[math  scope=global&show=F]mm=2[/math][butInc mathVar=mm][mm]	3
+butInc	MathVar By 4	[butInc mathVar=mm&by=4][mm]	7
+
+butDec	direct	[text scope=global]xx=2[/text][butDec xx][xx]	1
+butDec	TextVar	[butDec textVar=xx][xx]	0
+butDec	TextVar By 4	[butDec textVar=xx&by=4][xx]	-4
+butDec	MathVar	[math  scope=global&show=F]mm=2[/math][butDec mathVar=mm][mm]	1
+butDec	MathVar By 4	[butDec mathVar=mm&by=4][mm]	-3
+
+butExponent	nothing	[butExponent]	10
+butExponent	default^3	[butExponent power=3]	1000
+butExponent	default^-2	[butExponent power=-2]	0.01
+butExponent	5^3	[butExponent value=5&power=3]	125
+butExponent	5^-2	[butExponent value=5&power=-2]	0.04
+
+butRound	123.45	[butRound 123.45]	123
+butRound	123.49	[butRound 123.49]	123
+butRound	123.50	[butRound 123.50]	124
+butRound	123.56	[butRound 123.56]	124
+butRound	1.2345, 2	[butRound value=1.2345&precision=2]	1.23
+butRound	1.2349, 2	[butRound value=1.2349&precision=2]	1.23
+butRound	1.2350, 2	[butRound value=1.2350&precision=2]	1.24
+butRound	1.2356, 2	[butRound value=1.2356&precision=2]	1.24
+
+butRandom	nothing	[text]x=[butRandom][/text][if ([x]<0) | ([x]>99)][then]FAILED[/then][else]SUCCESS[/else][/if]	SUCCESS
+butRandom	nothing, Integer	[text]x=[butRandom type=I][/text][if ([x]<0) | ([x]>99)][then]FAILED[/then][else]SUCCESS[/else][/if]	SUCCESS
+butRandom	nothing, Float	[text]x=[butRandom type=F][/text][if ([x]<0) | ([x]>1.0)][then]FAILED[/then][else]SUCCESS[/else][/if]	SUCCESS
+butRandom	Integer 250 to 270	[text]x=[butRandom min=250&max=270&type=I][/text][if ([x]<250) | ([x]>270)][then]FAILED[/then][else]SUCCESS[/else][/if]	SUCCESS
+butRandom	Float, 5.6 to 7.3	[text]x=[butRandom min=5.6&max=7.3&type=F=I][/text][if ([x]<5.6) | ([x]>7.3)][then]FAILED[/then][else]SUCCESS[/else][/if]	SUCCESS
+
+butGetWebDNAPref	direct UnixUser	[butGetWebDNAPref UnixUser]	www-data
+butGetWebDNAPref	DateFormat	[butGetWebDNAPref key=DateFormat]	%m/%d/%Y
+butGetWebDNAPref	dateformat	[butGetWebDNAPref key=dateformat]	%m/%d/%Y
+butGetWebDNAPref	Bogus Default	[butGetWebDNAPref key=Bogus&default=HOWDY]	HOWDY
+
+butDefaultValue	value	[butDefaultValue value=VALUE&default=DEFAULT]	VALUE
+butDefaultValue	default	[butDefaultValue value=&default=DEFAULT]	DEFAULT
+butDefaultValue	blank var	[text]x=[/text][butDefaultValue value=[x]&default=BLANK]	BLANK
+
+butEndsWith	YES	[butEndsWith string=I say YES&find=YES]	1=1
+butEndsWith	NO	[butEndsWith string=I say YES&find=NO]	1=0
+butEndsWith	Empty String	[butEndsWith string=&find=YES]	1=0
+butEndsWith	Empty Find	[butEndsWith string=I say YES&find=]	1=0
+
+butTrim	Trim	__TRIM__	__RESULT__
+
+butShowHTML	HTML	[butShowHTML This is <b>BOLD</b> <input type="text" value="hello">]	This is &lt;b&gt;BOLD&lt;/b&gt; &lt;input type="text" value="hello"&gt;
+
+butElapsedTime	Wait 101 Ticks	[loop start=1&end=100000][showif [elapsedtime]=101][break][/showif][/loop][butElapsedTime]	1.68
+butElapsedTime	Given 101 Ticks	[butElapsedTime 101]	1.68
+butElapsedTime	100 TPS	[butElapsedTime elapsed=150&tickspersecond=100]	1.50
+
+butPassword	Default	[countchars][butPassword][/countchars]	8
+butPassword	13 characters	[countchars][butPassword length=13][/countchars]	13
+butPassword	Layout	[countchars][butPassword layout=XUL9#**][/countchars]	7
+
+butWeekdayOffset	3 Before	[text]tDate=6/6/2012[/text][format days_to_date %A %m/%d/%Y][butWeekdayOffset date=[tDate]&daysbefore=3][/format]	Friday 06/01/2012
+butWeekdayOffset	3 After	[text]tDate=6/6/2012[/text][format days_to_date %A %m/%d/%Y][butWeekdayOffset date=[tDate]&daysafter=3][/format]	Monday 06/11/2012
+butWeekdayOffset	Numeric Date	[text]tDate=[math]{6/6/2012}[/math][/text][format days_to_date %A %m/%d/%Y][butWeekdayOffset date=[tDate]&daysafter=2][/format]	Friday 06/08/2012
+
+butDaysToDate	Friendly	[text]tDate=[math]{6/6/2012}[/math][/text][butDaysToDate days=[tDate]&dateformat=%A %m/%d/%Y&friendly=T]	Wednesday 6/6/2012
+butDaysToDate	Un-Friendly	[text]tDate=[math]{6/6/2012}[/math][/text][butDaysToDate days=[tDate]&dateformat=%A %m/%d/%Y]	Wednesday 06/06/2012
+
+butSecondsToTime	Friendly	[text]tTime=[math]{08:37:43}[/math][/text][butSecondsToTime seconds=[tTime]&timeformat=%I:%M:%S %p&friendly=T&lower=T]	8:37:43 am
+butSecondsToTime	Un-Friendly	[text]tTime=[math]{08:37:43}[/math][/text][butSecondsToTime seconds=[tTime]&timeformat=%I:%M:%S %p]	08:37:43 AM
+
+butIsDefined	Yes	[text]tVar=YES[/text][butIsDefined tVar],[butValue]	1=1,YES
+butIsDefined	No	[butIsDefined tNotAVar]	1=0
+
+butNotDefined	Yes	[text]tVar=YES[/text][butNotDefined tVar],[butValue]	1=0,YES
+butNotDefined	No	[butNotDefined tNotAVar],[butValue]	1=1,
+
+butIsTextVar	Yes	[text]tVar=YES[/text][butIsTextVar name=tVar&scope=assert],[butValue]	1=1,YES
+butIsTextVar	No	[math show=F]tVar=1[/math][butIsTextVar name=tVar&scope=assert]	1=0
+
+butIsMathVar	Yes	[math show=F]tVar=1[/math][butIsMathVar name=tVar&scope=assert],[butValue]	1=1,1
+butIsMathVar	No	[text]tVar=YES[/text][butIsMathVar name=tVar&scope=assert]	1=0
+
+butIsFormVar	runTest	[butIsFormVar runTest]	1=1
+butIsFormVar	name=runTest	[butIsFormVar name=runTest]	1=1
+butIsFormVar	tVar	[butIsFormVar tVar]	1=0
+butIsFormVar	name=tVar	[butIsFormVar name=tVar]	1=0
+
+butIsNumeric	123	[butIsNumeric 123]	1=1
+butIsNumeric	-123.45	[butIsNumeric -123.45]	1=1
+butIsNumeric	123.45.67	[butIsNumeric 123.45.67]	1=0
+butIsNumeric	a123	[butIsNumeric a123]	1=0
+butIsNumeric	number=123	[butIsNumeric number=123]	1=1
+butIsNumeric	number=-123.45	[butIsNumeric number=-123.45]	1=1
+butIsNumeric	number=-123,45	[butIsNumeric number=-123,45]	1=0
+butIsNumeric	period want comma	[butIsNumeric number=-123.45&decimal=,]	1=0
+butIsNumeric	comma want comma	[butIsNumeric number=-123,45&decimal=,]	1=1
+
+butIsInteger	123	[butIsInteger 123]	1=1
+butIsInteger	-123	[butIsInteger -123]	1=1
+butIsInteger	-123.45	[butIsInteger -123.45]	1=0
+butIsInteger	123 range	[butIsInteger number=123&min=100&max=200]	1=1
+butIsInteger	-123 range	[butIsInteger number=-123&min=100&max=200]	1=0
+
+butIsAlpha	lower	[butIsAlpha abcde]	1=1
+butIsAlpha	mixed	[butIsAlpha AbCdE]	1=1
+butIsAlpha	upper	[butIsAlpha ABCDE]	1=1
+butIsAlpha	alphanum	[butIsAlpha Abcde123]	1=0
+butIsAlpha	special	[butIsAlpha Abcde Monkey]	1=0
+
+butIsAlphaNumeric	lower	[butIsAlphaNumeric abcde123]	1=1
+butIsAlphaNumeric	mixed	[butIsAlphaNumeric AbCdE]	1=1
+butIsAlphaNumeric	upper	[butIsAlphaNumeric ABCDE]	1=1
+butIsAlphaNumeric	alphanum	[butIsAlphaNumeric Abcde123]	1=1
+butIsAlphaNumeric	decimal	[butIsAlphaNumeric Abcde123.456]	1=0
+butIsAlphaNumeric	special	[butIsAlphaNumeric Abcde Monkey]	1=0
+
+butIsLower	lower	[butIsLower abcde 123]	1=1
+butIsLower	value=lower	[butIsLower value=abcde 123]	1=1
+butIsLower	mixed	[butIsLower AbCdE 123]	1=0
+butIsLower	upper	[butIsLower ABCDE 123]	1=0
+
+butIsUpper	upper	[butIsUpper ABCDE 123]	1=1
+butIsUpper	value=upper	[butIsUpper value=ABCDE 123]	1=1
+butIsUpper	mixed	[butIsUpper AbCdE 123]	1=0
+butIsUpper	lower	[butIsUpper abcde 123]	1=0
+
+butIsEmpty	empty	[text]x=[/text][butIsEmpty x]	1=1
+butIsEmpty	not empty	[text]x=abc[/text][butIsEmpty x]	1=0
+
+butIsFile	file	[writefile testfile.txt]contents[/writefile][butIsFile testfile.txt]	1=1
+butIsFile	deleted	[deletefile testfile.txt][butIsFile testfile.txt]	1=0
+butIsFile	folder	[createfolder testfile.txt][butIsFile testfile.txt]	1=0
+butIsFile	deleted	[deletefolder testfile.txt][butIsFile testfile.txt]	1=0
+
+butIsFolder	file	[writefile testfolder]contents[/writefile][butIsFolder testfolder]	1=0
+butIsFolder	deleted	[deletefile testfolder][butIsFolder testfolder]	1=0
+butIsFolder	folder	[createfolder testfolder][butIsFolder testfolder]	1=1
+butIsFolder	deleted	[deletefolder testfolder][butIsFolder testfolder]	1=0
+
+butExactMatch	yes	[butExactMatch value1=AbC&value2=AbC]	1=1
+butExactMatch	text diff	[butExactMatch value1=AbC&value2=AbCd]	1=0
+butExactMatch	case diff	[butExactMatch value1=AbC&value2=abc]	1=0
+
+butIDTagComponents	mid number	[butIDTagComponents ABC123X],[butPrefix],[butNumber],[butSuffix]	1=1,ABC,123,X
+butIDTagComponents	lead number	[butIDTagComponents 123X],[butPrefix],[butNumber],[butSuffix]	1=1,,123,X
+butIDTagComponents	tail number	[butIDTagComponents ABC123],[butPrefix],[butNumber],[butSuffix]	1=1,ABC,123,
+butIDTagComponents	two numbers	[butIDTagComponents A21BC123X],[butPrefix],[butNumber],[butSuffix]	1=1,A21BC,123,X
+butIDTagComponents	no number	[butIDTagComponents ABCDEFX],[butPrefix],[butNumber],[butSuffix]	1=0,,,ABCDEFX
+
+butCapitalize	upper	[butCapitalize ABC.]	Abc.
+butCapitalize	mixed	[butCapitalize aBc.]	aBc.
+butCapitalize	lower	[butCapitalize abc.]	Abc.
+
+lower,Capitalized,lowMixed,aMixed,CapMixed,aSmallThing,ABigThing,ALLCAPS,TEKsystems,Catch22byJoeSmith
+
+butSplitMixedCaseWord	lower	[butSplitMixedCaseWord lower]	Lower
+butSplitMixedCaseWord	Capitalized	[butSplitMixedCaseWord Capitalized]	Capitalized
+butSplitMixedCaseWord	lowMixed	[butSplitMixedCaseWord lowMixed]	Low Mixed
+butSplitMixedCaseWord	CapMixed	[butSplitMixedCaseWord CapMixed]	Cap Mixed
+butSplitMixedCaseWord	aSmallThing	[butSplitMixedCaseWord aSmallThing]	A Small Thing
+butSplitMixedCaseWord	ABigThing	[butSplitMixedCaseWord ABigThing]	ABig Thing
+butSplitMixedCaseWord	ALLCAPS	[butSplitMixedCaseWord ALLCAPS]	ALLCAPS
+butSplitMixedCaseWord	TEKsystems	[butSplitMixedCaseWord TEKsystems]	TEKsystems
+butSplitMixedCaseWord	Catch22	[butSplitMixedCaseWord Catch22byJosephHeller]	Catch 22 By Joseph Heller
+
+butTextSet	tVar	[butTextSet tVar=monkey][tVar]	monkey
+butTextSet	local	[butTextSet tVar=chimp][listvariables scope=assert&type=text&name=tVar][value][/listvariables]	
+butTextSet	global	[butTextSet tVar=gorilla][listvariables scope=global&type=text&name=tVar][value][/listvariables]	gorilla
+
+butMathSet	mVar	[butMathSet mVar=27/3][mVar]	9
+butMathSet	local	[butMathSet mVar=36/4][listvariables scope=assert&type=text&name=mVar][value][/listvariables]	
+butMathSet	global	[butMathSet mVar=50/5][listvariables scope=global&type=text&name=mVar][value][/listvariables]	10
+
+butArraySet	frog	[arrayset name=aDays&dim=7&scope=global](1)=Sun&(2)=Mon&(3)=Tue&(4)=Wed&(5)=Thu&(6)=Fri&(7)=Sat[/arrayset][butArraySet aDays(3)=Frog][aDays(3)]	Frog
+
+butListToArray	Rachel	[butListToArray list=[url]bob,carol,ted,alice,ross&rachel[/url]]	(1)=bob&(2)=carol&(3)=ted&(4)=alice&(5)=ross%26rachel
+butListToArray	Rachel	[butListToArray list=[url]bob,carol,ted,alice,ross&rachel[/url]&delimiters=[url],&[/url]]	(1)=bob&(2)=carol&(3)=ted&(4)=alice&(5)=ross&(6)=rachel
+
+butHost	host	[butHost]	[/raw][listmimeheaders name=HTTP_HOST][value][/listmimeheaders][raw]
+
+butMIMEDate	simple	[butMIMEDate expiredate=6/15/2020&expiretime=15:45]	Mon, 15 Jun 2020 23:45:00 GMT
+butMIMEDate	GMT	[butMIMEDate expiredate=6/15/2020&expiretime=15:45&gmtoffset=0]	Mon, 15 Jun 2020 15:45:00 GMT
+butMIMEDate	3 days	[butMIMEDate expiredate=6/15/2020&expiretime=15:45&gmtoffset=0&days=3&minutes=17]	Thu, 18 Jun 2020 16:02:00 GMT
+
+butCookieExpire	simple	[butCookieExpire expiredate=6/15/2020&expiretime=15:45]	Monday, 15 Jun 2020 23:45:00 GMT
+butCookieExpire	GMT	[butCookieExpire expiredate=6/15/2020&expiretime=15:45&gmtoffset=0]	Monday, 15 Jun 2020 15:45:00 GMT
+butCookieExpire	3 days	[butCookieExpire expiredate=6/15/2020&expiretime=15:45&gmtoffset=0&days=3&minutes=17]	Thursday, 18 Jun 2020 16:02:00 GMT
+
+butCookieDomain	bss	[butCookieDomain]	.brainscansoftware.com
+
+butSiteRoot	unittests	[butSiteRoot]	../../
+
+butThisPage	unittest	[butThisPage]	brainutility.dna
+
+butSortList	Simple	[text]tList=Mike,Betty,Tim,Harry,Michelle,Abdul,LeeAnna,Zooey,Alexandra[/text][butSortList [tList]]	Abdul,Alexandra,Betty,Harry,LeeAnna,Michelle,Mike,Tim,Zooey
+butSortList	Reverse	[text]tList=Mike,Betty,Tim,Harry,Michelle,Abdul,LeeAnna,Zooey,Alexandra[/text][butSortList ValueList=[url][tList][/url]&Reverse=T]	Zooey,Tim,Mike,Michelle,LeeAnna,Harry,Betty,Alexandra,Abdul
+butSortList	Numbers	[text]tList=17,27,15.4,2023,1499,-17.88[/text][butSortList ValueList=[url][tList][/url]&Type=Num]	-17,4,15,17,27,88,1499,2023
+butSortList	Numbers (Alpha)	[text]tList=17,27,15.4,2023,1499,-17.88[/text][butSortList ValueList=[url][tList][/url]&Type=Text]	-17,1499,15,17,2023,27,4,88
+butSortList	Dates	[text]tList=1/1/2017,11/10/1965,12/7/1942,2/2/2020,9/5/1969[/text][butSortList ValueList=[url][tList][/url]&Type=DATE&delimiters=,]	12/7/1942,11/10/1965,9/5/1969,1/1/2017,2/2/2020
+butSortList	Times	[text]tList=15:30:23,10:23 PM,9:54,9:54 PM,12:00[/text][butSortList ValueList=[url][tList][/url]&Type=TIME&delimiters=,]	9:54,12:00,15:30:23,9:54 PM,10:23 PM
+
+butUpdateList	Add	[butUpdateList list=1,2,3&add=4,5,6]	1,2,3,4,5,6
+butUpdateList	Delete	[butUpdateList list=1,2,3&delete=1]	2,3
+butUpdateList	Delete2	[butUpdateList list=1,2,3&delete=2]	1,3
+butUpdateList	Delete3	[butUpdateList list=1,2,3&delete=3]	1,2
+butUpdateList	Delete All	[butUpdateList list=1,2,3&delete=3,2,1]	
+butUpdateList	Delimited	[butUpdateList list=a b c&delimiter= &add=d e f&delete=b c]	a d e f
+
+butWordList	Add	[butWordList words=1,2,3&add=4,5,6]	1,2,3,4,5,6
+butWordList	Exclude	[butWordList words=1,2,3&exclude=1]	2,3
+butWordList	Exclude2	[butWordList words=1,2,3&exclude=2]	1,3
+butWordList	Exclude3	[butWordList words=1,2,3&exclude=3]	1,2
+butWordList	Exclude All	[butWordList words=1,2,3&exclude=3,2,1]	
+butWordList	Delimited	[butWordList words=a b c&delimiter= &add=d e f&exclude=b c]	a d e f
+
+butListContainsItem	Partial OK	[butListContainsItem list=1,2,3&items=5,3],[butValue]	1=1,3
+butListContainsItem	Partial Bad	[butListContainsItem list=1,2,3&items=5,3&all=T],[butValue]	1=0,0
+butListContainsItem	All OK	[butListContainsItem list=1,2,3,4,5&items=5,3&all=T],[butValue]	1=1,3
+butListContainsItem	Single OK	[butListContainsItem list=1 2 3 4 5&item=4&delimiters= ],[butValue]	1=1,4
+butListContainsItem	Single Bad	[butListContainsItem list=1 2 3 4 5&item=9&delimiters= ],[butValue]	1=0,0
+butListContainsItem	Loose Good	[butListContainsItem list=John,Joe,susie&item=John],[butValue]	1=1,1
+butListContainsItem	Loose Bad	[butListContainsItem list=John,Joe,susie&item=John],[butValue]	1=1,1
+butListContainsItem	Exact Good	[butListContainsItem list=John,Joe,susie&item=John&exact=T],[butValue]	1=1,1
+butListContainsItem	Exact Bad	[butListContainsItem list=John,Joe,susie&item=joe&exact=T],[butValue]	1=0,0
+
+butListPosition	Loose Good	[butListPosition list=Bob,Ted,Jill,Jane,Margaret&item=jill]	3
+butListPosition	Loose Bad	[butListPosition list=Bob,Ted,Jill,Jane,Margaret&item=harry]	0
+butListPosition	Exact Good	[butListPosition list=Bob Ted Jill Jane Margaret&item=Jill&delimiter= &exact=T]	3
+butListPosition	Exact Bad	[butListPosition list=Bob Ted Jill Jane Margaret&item=jill&delimiter= &exact=T]	0
+
+butGetListItem	Valid	[butGetListItem list=Bob,Ted,Jill,Jane,Margaret&index=2]	Ted
+butGetListItem	Delimited	[butGetListItem list=Bob Ted Jill Jane Margaret&index=1&delimiters= ]	Bob
+butGetListItem	Out of Range	[butGetListItem list=Bob,Ted,Jill,Jane,Margaret&index=10]	
+
+butGetWord	Valid	[butGetWord words=Bob,Ted,Jill,Jane,Margaret&index=2]	Ted
+butGetWord	Delimited	[butGetWord words=Bob Ted Jill Jane Margaret&index=1&delimiters= ]	Bob
+butGetWord	Out of Range	[butGetWord words=Bob,Ted,Jill,Jane,Margaret&index=10]	
+
+butAuthorizeNet	UNKNOWN	NOT	TESTED
+
+butTCPFetch	TestFile	[writefile testfile.txt]contents[/writefile][butTCPFetch http://brainscansoftware.com/brainscan/unittests/testfile.txt]	contents
+butTCPFetch	TestFile	[writefile testfile.txt]contents[/writefile][butTCPFetch address=http://brainscansoftware.com/brainscan/unittests/testfile.txt&startafter=c&endbefore=s]	ontent
+
+butShowNonBlank	Blank	[text]tVar=[/text]([butShowNonBlank value=[url][tVar][/url]&prefix=//&suffix=\\])	()
+butShowNonBlank	NonBlank	[text]tVar=Howdy[/text]([butShowNonBlank value=[url][tVar][/url]&prefix=//&suffix=\\])	(//Howdy\\)
+
+butAddressFormat	2 Lines no Zip	[butAddressFormat address=1313 Mocking Bird Lane%0DApartment 13&city=Los Angeles&break=*]	1313 Mocking Bird Lane*Apartment 13*Los Angeles
+butAddressFormat	1 Line w/ Zip	[butAddressFormat address=1313 Mocking Bird Lane&city=Los Angeles&state=CA&zip=98765&break=*]	1313 Mocking Bird Lane*Los Angeles, CA 98765
+butAddressFormat	Country	[butAddressFormat address=1313 Mocking Bird Lane&city=Los Angeles&state=CA&zip=98765&country=USA&break=*]	1313 Mocking Bird Lane*Los Angeles, CA 98765*USA
+
+butPhoneFormat	Default Ext	[butPhoneFormat 123.456.7890, extension 1234]	(123)456-7890x1234
+butPhoneFormat	Alpha	[butPhoneFormat number=123.456.CALL]	(123)456-CALL
+butPhoneFormat	Custom Ext	[butPhoneFormat number=0123.456.7890 Ext 77, extension 1234&Chars=0-9&PhoneFormat=1*3-3-4xN]	0*123-456-7890x771234
+butPhoneFormat	Default 6	[butPhoneFormat 12.1234]	(121)234-
+butPhoneFormat	Default 7	[butPhoneFormat number=555 1212]	555-1212
+
+butAge	Person	[butAge DOB=6/10/1985&AsOf=1/1/2020],[butMonths],[butDays],[butFuture]	34,6,22,1=0
+butAge	Magna Carta	[butAge DOB=6/15/1215&AsOf=11/15/2017],[butMonths],[butDays],[butFuture]	802,5,0,1=0
+butAge	Today	[butAge DOB=[butToday]],[butMonths],[butDays],[butFuture]	0,0,0,1=0
+butAge	Christmas +	[butAge DOB=12/25/2017&AsOf=11/15/2017],[butMonths],[butDays],[butFuture]	0,1,10,1=1
+butAge	Christmas -	[butAge DOB=12/25/2017&AsOf=12/28/2017],[butMonths],[butDays],[butFuture]	0,0,3,1=0
+
+butZip	Zip & Delete	[text]tP=[grep search=[butThisPage]&replace=][thisurl][/grep][/text][butZip Root=[tP]&file=[butThisPage]&ZipFile=[tP]test.zip&clean=T]:[fileinfo [tP][butThisPage]][isfile][/fileinfo][deletefile [tP]test.zip]	1=1:T
+
+butLoadRecord	Load Record	[closedatabase /brainscan/test.db][writefile /brainscan/test.db]A##09B##09C##0D1##092##093##0D4##095##096##0D[/writefile][butLoadRecord db=/brainscan/test.db##26param=[url]eqAdatarq=4[/url]##26prefix=x]:[butError]:[xA]:[xB]:[xC]	1=1::4:5:6
+
+butFedExLink	FedEx Link	[text]trackingNumbers=9999999999,8888888888[/text][butFedExLink tracking=[trackingNumbers]]	http://www.fedex.com/Tracking?cntry_code=us&language=english&tracknumbers=9999999999,8888888888
+
+butFedExTracking	BROKEN	NOT	WORKING
+
+butUPSLink	UPS Link	[butUPSLink 1Z3Y55R20314876531]	http://wwwapps.ups.com/WebTracking/OnlineTool?TypeOfInquiryNumber=T&UPS_HTML_Version=3.0&IATA=us&Lang=eng&InquiryNumber1=1Z3Y55R20314876531
+
+butShippingLink	DHL	[butShippingLink Tracking=1234567890&Carrier=DHL]	http://www.dhl.com/en/express/tracking.html?AWB=1234567890&brand=DHL
+butShippingLink	UPS	[butShippingLink Tracking=1Z1234567890]	http://wwwapps.ups.com/WebTracking/OnlineTool?TypeOfInquiryNumber=T&UPS_HTML_Version=3.0&IATA=us&Lang=eng&InquiryNumber1=1Z1234567890
+butShippingLink	FedEx	[butShippingLink Tracking=1234567890]	http://www.fedex.com/Tracking?cntry_code=us&language=english&tracknumbers=1234567890
+butShippingLink	USPS	[butShippingLink Tracking=1234567890&Carrier=USPS]	https://tools.usps.com/go/TrackConfirmAction.action?tLabels=1234567890
+butShippingLink	BAD	[butShippingLink Tracking=1234567890&Carrier=BAD]	javascript:alert('No tracking link available for BAD');
+
+butShortenString	preset	[text scope=global]testString=This is a long string of text, and we want to shorten it.[/text]	
+butShortenString	No Tail	[butShortenString string=[url][testString][/url]&max=25&break=word]	This is a long string of&hellip;
+butShortenString	Word Tail	[butShortenString string=[url][testString][/url]&max=25&break=word&tail=5]	This is a long&hellip;it.
+butShortenString	Char Tail	[butShortenString string=[url][testString][/url]&max=25&break=char&tail=5&insert=___]	This is a long strin___n it.
+
+butCountOccurrences	None	[butCountOccurrences string=monkey see monkey do&find=turtle]	0
+butCountOccurrences	One	[butCountOccurrences string=monkey see monkey do&find=see]	1
+butCountOccurrences	Two	[butCountOccurrences string=monkey see monkey do&find=monkey]	2
+
+butFileSize	File	[writefile testfile.txt]This file contains 28 bytes.[/writefile][butFileSize Path=testfile.txt][deletefile testfile.txt]	28B
+butFileSize	1000	[butFileSize Bytes=12345567890&Precision=2]	12.35GB
+butFileSize	1024	[butFileSize Bytes=12345567890&Precision=2&KSize=1024&Spaced=T]	11.50 GB
+	
+butCSVMap	Quote	[url][butCSVValue My name is "Harry"][/url]	My%20name%20is%20%22%22Harry%22%22
+butCSVMap	Tab, Return	[url][butCSVValue [unurl]Frog%1DMonkey%0BTurtle[/unurl]][/url]	%22Frog%09Monkey%0DTurtle%22
+
+butTextMap	Text	[url][butTextMap [unurl]%26%A9%3Cbr%3E%93hello%94%0DNewman[/unurl]][/url]	%26amp%3B%26copy%3B%26lt%3Bbr%26gt%3B%22hello%22%3Cbr%20/%3ENewman
+
+butTextMapRaw	Text Raw	[url][butTextMapRaw [unurl]A%1DB%1D<b>C</b>%0B1%1D2%1D<i>3</i>%0B[/unurl]][/url]	A%09B%09%3Cb%3EC%3C/b%3E%0D1%092%09%3Ci%3E3%3C/i%3E%0D
+
+butHTMLMap	HTML	[url][butHTMLMap [unurl]%26%A9%3Cbr%3E%93hello%94%0DNewman[/unurl]][/url]	%26%26copy%3B%3Cbr%3E%22hello%22%3Cbr%20/%3ENewman
+
+butHTMLNoBreakMap	HTML No BR	[url][butHTMLNoBreakMap [unurl]%26%A9%3Cbr%3E%93hello%94%0DNewman[/unurl]][/url]	%26%26copy%3B%3Cbr%3E%22hello%22%0DNewman
+
+butUTF8Map	UTF-8	[text]tASCII=[unurl]%99%9F%A0%A5%E7[/unurl][/text][url][butUTF8Map [unurl]%99%9F%A0%A5%E7[/unurl]][/url]	%99%9F%C2%A0%C2%A5%C3%A7
+
+butEntityMap	Entity	[url][butEntityMap [unurl]%93%99%94 "<>"[/unurl]][/url]	%26ldquo%3B%26trade%3B%26rdquo%3B%20%26quot%3B%26lt%3B%26gt%3B%26quot%3B
+
+butEditMap	Edit	[url][butEditMap [unurl]%93Hello,%94 said she.%0B%0BHe just shrugged.[/unurl]][/url]	%26ldquo%3BHello%2C%26rdquo%3B%20said%20she.%26%23013%3B%26%23013%3BHe%20just%20shrugged.
+
+butSmartMap	Auto	[url][butSmartMap Line <b>one</b>[unurl]%0B%0B[/unurl]Line <b>two</b>][/url]	Line%20%3Cb%3Eone%3C/b%3E%3Cbr%20/%3E%3Cbr%20/%3ELine%20%3Cb%3Etwo%3C/b%3E
+butSmartMap	Manual	[url][butSmartMap Line <b>three</b><br />[unurl]%0B%0B[/unurl]Line <b>four</b>][/url]	Line%20%3Cb%3Ethree%3C/b%3E%3Cbr%20/%3E%0D%0DLine%20%3Cb%3Efour%3C/b%3E
+
+zzFail	this will fail	monkey	cat
+[/raw][/table]
+
+##Tricky Tests
+
+[replace table=_Tests&eqCodedatarq=__TRIM__]code=[url][raw][butTrim [url]
+	One=1
+	&Two=2   
+    &Three=3	
+    
+    [/url]][/raw][/url]&result=[url]One=1&Two=2&Three=3[/url][/replace]
+
+[replace table=_Tests&eqCodedatarq=__LoadRecord__]code=[url][raw][writefile /brainscan/test.db]A##09B##09C##0D1##092##093##0D4##095##096##0D[/writefile][butLoadRecord db=/brainscan/test.db&param=[url]eqAdatarq=4[/url]&prefix=x][xA]:[xB]:[xC][/raw][/url]&result=[url]1=1:4:5:6[/url][/replace]
+
+[closedatabase /brainscan/test.db]
+[writefile /brainscan/test.db]A	B	C
+1	2	3
+4	5	6
+[/writefile][butLoadRecord db=/brainscan/test.db&param=[url]eqAdatarq=4[/url]&prefix=x][zA]:[xB]:[xC][/raw][/url]&result=4:5:6[/replace]
+
+
+##/Tricky Tests
+
+[text]_true=1=1[/text]
+[text]_false=1=0[/text]
+
+[function name=uEscapeMap]
+	[if "[url][params_string][/url]"^"[url]##[/url]"][then]
+		[return][grep search=##&replace=%][butTextMapRaw [params_string]][/grep][/return]
+	[/then][else]
+		[return][url][params_string][/url][/return]
+	[/else][/if]
+[/function]
+
+[function name=assert]
+input:
+	code - WebDNA code to execute via INTERPRET
+	result - expected results
+
+output:
+	Return value	- true (1=1) or false (1=0)
+	gReason 		- global set with description of success or failure
+	
+	[text]tCode=[:local:code][/text]
+	[text]uExpected=[url][:local:result][/url][/text]
+	[text]uActual=[url][interpret][tCode][/interpret][/url][/text]
+	
+	[if [butExactMatch value1=[uActual]&value2=[uExpected]]][then]
+		[return][_true][/return]
+		[text scope=global]gReason=<code class="success">Success</code>[/text]
+	[/then][else]
+		[return][_false][/return]
+		[text scope=global]gReason=<code class="failure">
+		Expected Result: <b>[unurl][uExpected][/unurl]</b><br />
+		Actual Result:   <b>[unurl][uActual][/unurl]</b></code>[/text]
+	[/else][/if]
+[/function]
+
+[text]tTestList=[search table=_Tests&necodedatarq=[blank]&rank=off&testsumm=T][text]tTestCount=[numfound][/text][founditems][hideif [index]=1],[/hideif][test][/founditems][/search][/text]
+[text]tColumnLength=[if [tTestCount]>7][then][math]ceil([tTestCount]/4)[/math][/then][else][tTestCount][/else][/if][/text]
+
+[text]tRunList=[formvariables name=runTest][hideif [index]=1],[/hideif][value][/formvariables][/text]
+[if "[url][tRunList][/url]"=""][then]
+	[text]tDoRun=[_false][/text]
+	[text]tRunList=[tTestList][/text]
+[/then][else]
+	[text]tDoRun=[_true][/text]
+[/else][/if]
+
+[/text][text]init=[/text]
+
+[!]
+[listvariables type=text][name]=[value]<br>[/listvariables]
+[/!]
+
+<form name="run" action="[thisurl]" method="post">
+	<table id="checkboxes"><tr><td>
+		[listwords words=[tTestList]]
+			[text]tTest=[word][/text]
+			<input type="checkbox" name="runTest" id="test_[tTest]" value="[tTest]"[showif [url],[tRunList],[/url]^[url][tTest][/url]] checked[/showif]><label for="test_[tTest]">[tTest]</label><br />
+			[if ([index]<[tTestCount]) & ([index]\[tColumnLength])][then]</td><td>[/then][/if]
+		[/listwords]
+	</td></tr></table>
+	<button onclick="checkAll('checkboxes', true); return false;">Check All</button>
+	<button onclick="checkAll('checkboxes', false); return false;">Uncheck All</button>
+	<input type="checkbox" name="continueOnError" id="continueOnError" value="T"[showif [continueOnError]=T] checked[/showif]><label for="continueOnError">Continue on Error</label><br />
+	<button type="submit">Run Tests</button>
+</form>
+
+[showif [tDoRun]]
+	<hr>
+	<table>
+		<tr><th>Function</th><th>Label</th><th>Code</th><th>Expected</th><th>Result</th></tr>
+		[text]tErrors=0[/text]
+		[text]tContinue=[_true][/text]
+		[listwords words=[tRunList]][showif [tContinue]]
+			[text]tTest=[word][/text]
+			[search table=_Tests&eqtestdatarq=[tTest]&rank=off][founditems][showif [tContinue]]
+				[text]tSuccess=[assert code=[uEscapeMap [code]]&result=[uEscapeMap [result]]][/text]
+				[hideif [tSuccess]][text]tErrors=[math][tErrors]+1[/math][/text][hideif [continueOnError]=T][text]tContinue=[_false][/text][/hideif][/hideif]
+				<tr>
+					<td>[showif [index]=1][test][/showif]</td>
+					<td>[label]</td>
+					<td><code>[unurl][uEscapeMap [code]][/unurl]</code></td>
+					<td><code>[unurl][uEscapeMap [result]][/unurl]</code></td>
+					<td>[gReason]</td>
+				</tr>
+			[/showif][/founditems][/search]
+		[/showif][/listwords]
+	</table>
+	[if [tErrors]=0]
+		[then]<span class="success"><b>All Tests Passed!</b></span>[/then]
+		[else]<span class="failure">[tErrors] Failed Test[hideif [tErrors]=1]s[/hideif].</span>[/else]
+	[/if]
+[/showif]
+</body></html>

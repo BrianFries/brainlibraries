@@ -1,0 +1,2177 @@
+[!]
+<host>secure.crest-tech.net</host>
+<host>dev.crest-tech.net</host>
+<filename>^/brainscan/library/brainutility.lib</filename>
+[/!]
+
+[if "[brainutilityLoaded]"!"T"][then][text]butNull=0
+[text]brainutilityLoaded=T[/text]
+
+[text]butVersion=01.00.00[/text]
+[text]butTrue=1=1[/text]
+[text]butFalse=1=0[/text]
+
+[text]butVLF=[unurl]%0B[/unurl][/text]
+[text]butCR=[unurl]%0D[/unurl][/text]
+[text]butLF=[unurl]%0A[/unurl][/text]
+[text]butTab=[unurl]%09[/unurl][/text]
+[text]butVTB=[unurl]%1B[/unurl][/text]
+
+[function name=butFunctions]
+butVersion
+butFunctions
+butFunctionParam
+butFunctionParamList
+butToday
+butNow
+butDaysToDate
+butSecondsToTime
+butWeekdayOffset
+butLineEnder
+butMin
+butMax
+butInc
+butDec
+butExponent
+butRound
+butRandom
+butGetWebDNAPref
+butDefaultValue
+butEndsWith
+butTrim
+butShowHTML
+butElapsedTime
+butPassword
+butIsDefined
+butNotDefined
+butIsTextVar
+butIsMathVar
+butIsFormVar
+butIsNumeric
+butIsInteger
+butIsLower
+butIsUpper
+butIsEmpty
+butIsFile
+butIsFolder
+butIDTagComponents
+butCapitalize
+butSplitMixedCaseWord
+butTextSet
+butMathSet
+butArraySet
+butListToArray
+butHost
+butMIMEDate
+butCookieExpire
+butCookieDomain
+butSiteRoot
+butThisPage
+butSortList
+butUpdateList
+butWordList
+butListContainsItem
+butGetWord
+butAuthorizeNet
+butTCPFetch
+butShowNonBlank
+butAddressFormat
+butPhoneFormat
+butAge
+butZip
+butLoadRecord
+butFedExLink
+butFedExTracking
+butUPSLink
+butShippingLink
+butShortenString
+butCountOccurrences
+butFileSize
+butCSVValue
+butTextMap
+butTextMapRaw
+butHTMLMap
+butHTMLNoBreakMap
+butUTF8Map
+butEntityMap
+butEditMap
+butAsciiCodeMap
+butSmartMap
+[/function]
+
+[function name=butFunctionParam]
+[if [math][version][/math]<8.2][then][return][butFunctionParam_OLD [params_string]][/return][/then][else]
+[if "[url]&[:local:params][/url]"^"[url]&[:local:name]=[/url]")][then]
+[text]tResult=[unurl][middle startafter=[url]&[:local:name]=[/url]&endbefore=[url]&[/url]&endcount=-1]&[:local:params][/middle][/unurl][/text]
+[/then][else]
+[text]tResult=[showif [url]&[params_string][/url]^[url]&default=[/url]][unurl][middle startafter=[url]&default=[/url]&endbefore=[url]&[/url]&endcount=-1][params_string][/middle][/unurl][/showif][/text]
+[/else][/if]
+[showif [:local:trim]=T][text]tResult=[getchars start=1&end=999&trim=both][tResult][/getchars][/text][/showif]
+[return][tResult][/return]
+[/else][/if]
+[/function]
+
+[function name=butFunctionParam_OLD]
+[text]tResult=[/text]
+[listwords words=[url][params_string][/url]&delimiters=[url]&[/url]]
+[showif [url][word][/url]~[url]default=[/url]][text]tResult=[middle startafter=[url]=[/url]][word][/middle][/text][/showif]
+[/listwords]
+[showif [url]&[:local:params][/url]^[url]&[:local:name]=[/url]]
+[text multi=T][:local:params][/text]
+[text]tResult=[text show=T][:local:name][/text][/text]
+[/showif]
+[showif [:local:trim]=T][text]tResult=[getchars start=1&end=999&trim=both][tResult][/getchars][/text][/showif]
+[return][tResult][/return]
+[/function]
+
+[function name=butFunctionParamList]
+	[text]uParams=[url][params_string][/url][/text]
+	[text]tParamList=[/text]
+	
+	[if "[uParams]"!""][then]
+		[if "[uParams]"^"[url]=[/url]"][then]
+			[listwords words=[uParams]&delimiters=[url]&[/url]]
+				[text]tParamList=[hideif [url][tParamList][/url]=][tParamList],[/hideif][listwords words=[url][word][/url]&delimiters=[url]=[/url]][showif [index]=1][word][/showif][/listwords][/text]
+			[/listwords]
+		[/then][else]
+			[text]tParamList=params_string[/text]
+		[/else][/if]
+	[/then][/if]
+	[return][tParamList][/return]
+[/function]
+
+[function name=butToday]
+	[if "[url]&[params_string][/url]"^"[url]=[/url]"][then]
+		[text]tFormat=[if "[url]&[params_string][/url]"^"[url]&dateformat=[/url]"][then][:local:dateformat][/then][else][butGetWebDNAPref key=DateFormat&default=%m/%d/%y][/else][/if][/text]
+		[text]tFriendly=[if "[url][:local:Friendly][/url]"="T"][then][butTrue][/then][else][butFalse][/else][/if][/text]
+	[/then][else]
+		[text]tFormat=[if "[url]&[params_string][/url]"^"[url]&dateformat=[/url]"][then][:local:dateformat][/then][else][unurl][params_string][/unurl][/else][/if][/text]
+		[text]tFriendly=[butFalse][/text]
+	[/else][/if]
+	
+	[text]tDate=[math]{[:global:date]}[/math][/text]
+	[showif [url][tFormat][/url]!]
+		[text]tDate=[butDaysToDate days=[tDate]&dateformat=[url][tFormat][/url][showif [tFriendly]]&friendly=T[/showif]][/text]
+	[/showif]
+	[return][tDate][/return]
+[/function]
+
+[function name=butNow]
+	[if "[url][params_string][/url]"^"[url]=[/url]"][then]
+		[text]tFormat=[if "[url]&[params_string][/url]"^"[url]&timeformat=[/url]"][then][:local:timeformat][/then][else][butGetWebDNAPref key=TimeFormat&default=%H:%M:%S][/else][/if][/text]
+		[text]tFriendly=[if "[url][:local:Friendly][/url]"="T"][then][butTrue][/then][else][butFalse][/else][/if][/text]
+		[text]tLower=[if "[url][:local:Lower][/url]"="T"][then][butTrue][/then][else][butFalse][/else][/if][/text]
+	[/then][else]
+		[text]tFormat=[if "[url]&[params_string][/url]"^"[url]&timeformat=[/url]"][then][:local:timeformat][/then][else][unurl][params_string][/unurl][/else][/if][/text]
+		[text]tFriendly=[butFalse][/text]
+		[text]tLower=[butFalse][/text]
+	[/else][/if]
+
+	[text]tTime=[math]{[:global:time]}[/math][/text]
+	[showif [url][tFormat][/url]!]
+		[text]tTime=[butSecondsToTime seconds=[tTime]&timeformat=[url][tFormat][/url][showif [tFriendly]]&friendly=T[/showif][showif [tLower]]&lower=T[/showif]][/text]
+	[/showif]
+	[return][tTime][/return]
+[/function]
+
+[function name=butDaysToDate]
+	[text multi=T]tDays=0&tFormat=&tDate=[/text]
+	[text]tGood=[butTrue][/text]
+	[if "[url]&[params_string][/url]"^"[url]&format=[/url]")][then]
+		[return]<b>butDaysToDate needs "DateFormat" parameter, not "Format"</b>[/return]
+	[/then][else]
+
+		[if "[url]&[params_string][/url]"^"[url]&Days=[/url]"][then]
+			[text]tDays=[math]0[getchars start=1&end=20&trim=both][:local:Days][/getchars][/math][/text]
+		[/then][else]
+			[text]tDays=[math]0[getchars start=1&end=20&trim=both][params_string][/getchars][/math][/text]
+		[/else][/if]
+		[showif [url]&[params_string][/url]^[url]&DateFormat=[/url]][text]tFormat=[getchars start=1&end=99&trim=both][:local:DateFormat][/getchars][/text][/showif]
+		[text]tFriendly=[if "[url][:local:Friendly][/url]"="T"][then][butTrue][/then][else][butFalse][/else][/if][/text]
+
+		[if [tDays]>0][then]
+			[if "[tFormat]"=""][then]
+				[text]tFormat=[butGetWebDNAPref key=DateFormat&default=%m/%d/%Y][/text]
+			[/then][/if]
+			[if ([tFriendly]) & (("[url][tFormat][/url]"^"[url]%d[/url]") | ("[url][tFormat][/url]"^"[url]%m[/url]"))][then]
+				[listwords words=[url][tFormat][/url]&delimiters=%]
+					[if ("[word]"~"m") | ("[word]"~"d")][then]
+						[text]tDate=[tDate][math][format days_to_date %[getchars start=1&end=1][word][/getchars]][tDays][/format][/math][/text]
+						[text]tWord=[getchars start=2&end=99][word][/getchars][/text]
+						[hideif [url][tWord][/url]=][text]tDate=[tDate][format days_to_date [tWord]][tDays][/format][/text][/hideif]
+					[/then][else]
+						[text]tDate=[tDate][format days_to_date %[word]][tDays][/format][/text]
+					[/else][/if]
+				[/listwords]
+			[/then][else]
+				[text]tDate=[format days_to_date [tFormat]][tDays][/format][/text]
+			[/else][/if]
+		[/then][/if]
+
+		[return][tDate][/return]
+	[/else][/if]
+[/function]
+
+[function name=_butTimePatch]
+	[text]tSeconds=[:local:Seconds][/text]
+	[text]tReturn=[:local:TimeFormat][/text]
+
+	[if "[format seconds_to_time]999[/format]"="12:45:52"][then]
+		[text]tHours=[format 1.2d][math](floor([tSeconds]/3600))%24[/math][/format][/text]
+		[text]tHours12=[format 1.2d][if [tHours]>12][then][math][tHours]-12[/math][/then][else][if [tHours]=0][then]12[/then][else][tHours][/else][/if][/else][/if][/format][/text]
+		[text]tMinutes=[format 1.2d][math]floor(([tSeconds]%3600)/60)[/math][/format][/text]
+		[text]tSecs=[format 1.2d][math]floor([tSeconds]%60)[/math][/format][/text]
+		[text]tAMPM=[if [tHours]>11][then]PM[/then][else]AM[/else][/if][/text]
+		[text]tZone=[format seconds_to_time %Z]1[/format][/text]
+
+		[text]tReturn=[grep search=[url]%H[/url]&replace=[url][tHours][/url]][tReturn][/grep][/text]
+		[text]tReturn=[grep search=[url]%I[/url]&replace=[url][tHours12][/url]][tReturn][/grep][/text]
+		[text]tReturn=[grep search=[url]%M[/url]&replace=[url][tMinutes][/url]][tReturn][/grep][/text]
+		[text]tReturn=[grep search=[url]%p[/url]&replace=[url][tAMPM][/url]][tReturn][/grep][/text]
+		[text]tReturn=[grep search=[url]%S[/url]&replace=[url][tSecs][/url]][tReturn][/grep][/text]
+		[text]tReturn=[grep search=[url]%X[/url]&replace=[url][tHours]:[tMinutes]:[tSeconds][/url]][tReturn][/grep][/text]
+		[text]tReturn=[grep search=[url]%Z[/url]&replace=[url][tZone][/url]][tReturn][/grep][/text]
+	[/then][else]
+		[text]tReturn=[format seconds_to_time [tReturn]][tSeconds][/format][/text]
+	[/else][/if]
+	[return][tReturn][/return]
+[/function]
+
+[function name=butSecondsToTime]
+	[text multi=T]tSeconds=0&tFormat=&tTime=[/text]
+
+	[if "[url][params_string][/url]"^"[url]Seconds=[/url]"][then]
+		[text]tSeconds=[math]0[getchars start=1&end=20&trim=both][:local:Seconds][/getchars][/math][/text]
+	[/then][else]
+		[text]tSeconds=[math]0[getchars start=1&end=20&trim=both][params_string][/getchars][/math][/text]
+	[/else][/if]
+	[showif [url][params_string][/url]^[url]TimeFormat=[/url]][text]tFormat=[getchars start=1&end=99&trim=both][:local:TimeFormat][/getchars][/text][/showif]
+	[text]tFriendly=[if "[url][:local:Friendly][/url]"="T"][then][butTrue][/then][else][butFalse][/else][/if][/text]
+	[text]tLower=[if "[url][:local:Lower][/url]"="T"][then][butTrue][/then][else][butFalse][/else][/if][/text]
+
+	[if [tSeconds]>0][then]
+		[if "[tFormat]"=""][then]
+			[text]tFormat=[butGetWebDNAPref key=TimeFormat&default=%H:%M:%S][/text]
+		[/then][/if]
+
+		[if ([tFriendly]) & ("[url][tFormat][/url]"^"[url]%I[/url]")][then]
+			[listwords words=[url][tFormat][/url]&delimiters=%]
+				[if ("[word]"~"I")][then]
+					[text]tTime=[tTime][math][_butTimePatch seconds=[tSeconds]&timeformat=%[getchars start=1&end=1][word][/getchars]][/math][/text]
+					[text]tWord=[getchars start=2&end=99][word][/getchars][/text]
+					[hideif [url][tWord][/url]=][text]tTime=[tTime][_butTimePatch seconds=[tSeconds]&timeformat=[tWord]][/text][/hideif]
+				[/then][else]
+					[text]tTime=[tTime][_butTimePatch seconds=[tSeconds]&timeformat=%[word]][/text]
+				[/else][/if]
+			[/listwords]
+		[/then][else]
+			[text]tTime=[_butTimePatch seconds=[tSeconds]&timeformat=[tFormat]][/text]
+		[/else][/if]
+
+		[showif [tLower]][text]tTime=[lowercase][tTime][/lowercase][/text][/showif]
+	[/then][/if]
+
+	[return][tTime][/return]
+[/function]
+
+[function name=butWeekdayOffset]
+	[text]uParams=[url][params_string][/url][/text]
+	[text]tDate=[:local:date][/text]
+	[showif [url][tDate][/url]^/][text]tDate=[math]{[tDate]}[/math][/text][/showif]
+	[text]tDays=[butFunctionParam name=daysbefore&default=0&params=[uParams]][/text]
+	[if [tDays]>0][then]
+		[text]tBy=-1[/text]
+	[/then][else]
+		[text]tDays=[butFunctionParam name=daysafter&default=0&params=[uParams]][/text]
+		[text]tBy=1[/text]
+	[/else][/if]
+
+	[loop start=1&end=[tDays]]
+		[text]tDate=[math][tDate]+[tBy][/math][/text]
+		[loop start=1&end=2]
+			[showif _0_6_^_[format days_to_date %w][tDate][/format]_]
+				[text]tDate=[math][tDate]+[tBy][/math][/text]
+			[/showif]
+		[/loop]
+	[/loop]
+
+	[return][tDate][/return]
+[/function]
+
+[function name=butLineEnder]
+	[text multi=T]tCR=%0A&tSystem=[/text]
+
+	[if ("[url][params_string][/url]"^"[url]system=[/url]")][then]
+		[text]tSystem=[getchars start=1&end=10&trim=both][:local:system][/getchars][/text]
+	[/then][else]
+		[text]tSystem=[getchars start=1&end=10&trim=both][unurl][params_string][/unurl][/getchars][/text]
+	[/else][/if]
+	[showif [url][tSystem][/url]=]
+		[if "[platform]"^"unix"][then]
+			[text]tSystem=unix[/text]
+		[/then][else][if "[platform]"^"mac"][then]
+			[text]tSystem=mac[/text]
+		[/then][else]
+			[text]tSystem=windows[/text]
+		[/else][/if][/else][/if]
+	[/showif]
+	
+	[switch value=[tSystem]]
+		[case value=mac][text]tCR=%0D[/text][/case]
+		[case value=windows][text]tCR=%0D%0A[/text][/case]
+		[default][text]tCR=%0A[/text][/default]
+	[/switch]
+	
+	[return][unurl][tCR][/unurl][/return]
+[/function]
+
+[function name=butMin]
+	[text multi=T]tGood=T&tValueList=&tAlpha=&tDelim=&tMin=[/text]
+
+	[if ("[url][params_string][/url]"^"[url]valuelist=[/url]")][then]
+		[text]tValueList=[getchars start=1&end=10000&trim=both][:local:valuelist][/getchars][/text]
+	[/then][else]
+		[text]tValueList=[getchars start=1&end=10000&trim=both][unurl][params_string][/unurl][/getchars][/text]
+	[/else][/if]
+	
+	[if "[url][tValueList][/url]"=""][then]
+		[text]tMin=Missing "ValueList" parameter to butMin function call.[/text]
+	[/then][else]
+		[showif [url][params_string][/url]^[url]Alpha=[/url]][text]tAlpha=[getchars start=1&end=2&trim=both][:local:Alpha][/getchars][/text][/showif]
+		[showif [url][params_string][/url]^[url]Delimiters=[/url]][text]tDelim=&delimiters=[url][:local:Delimiters][/url][/text][/showif]
+
+		[if "[tAlpha]"="T"][then]
+			[listwords words=[url][tValueList][/url][tDelim]]
+				[if [index]=1][then]
+					[text]tMin=[word][/text]
+				[/then][else]
+					[if "[url][word][/url]"<"[url][tMin][/url]"][then][text]tMin=[word][/text][/then][/if]
+				[/else][/if]
+			[/listwords]
+		[/then][else]
+			[listwords words=[url][tValueList][/url][tDelim]]
+				[text]tValue=[math]0[getchars start=1&end=100&trim=both][word][/getchars][/math][/text]
+				[if [index]=1][then]
+					[text]tMin=[tValue][/text]
+				[/then][else]
+					[if [tValue]<[tMin]][then][text]tMin=[tValue][/text][/then][/if]
+				[/else][/if]
+			[/listwords]
+		[/else][/if]
+	[/else][/if]
+	
+	[return][tMin][/return]
+[/function]
+
+[function name=butMax]
+	[text multi=T]tGood=T&tValueList=&tAlpha=&tDelim=&tMax=[/text]
+
+	[if ("[url][params_string][/url]"^"[url]valuelist=[/url]")][then]
+		[text]tValueList=[getchars start=1&end=10000&trim=both][:local:valuelist][/getchars][/text]
+	[/then][else]
+		[text]tValueList=[getchars start=1&end=10000&trim=both][unurl][params_string][/unurl][/getchars][/text]
+	[/else][/if]
+	
+	[if "[url][tValueList][/url]"=""][then]
+		[text]tMax=Missing "ValueList" parameter to butMax function call.[/text]
+	[/then][else]
+		[showif [url][params_string][/url]^[url]Alpha=[/url]][text]tAlpha=[getchars start=1&end=2&trim=both][:local:Alpha][/getchars][/text][/showif]
+		[showif [url][params_string][/url]^[url]Delimiters=[/url]][text]tDelim=&delimiters=[url][:local:Delimiters][/url][/text][/showif]
+
+		[if "[tAlpha]"="T"][then]
+			[listwords words=[url][tValueList][/url][tDelim]]
+				[if [index]=1][then]
+					[text]tMax=[word][/text]
+				[/then][else]
+					[if "[url][word][/url]">"[url][tMax][/url]"][then][text]tMax=[url][word][/url][/text][/then][/if]
+				[/else][/if]
+			[/listwords]
+		[/then][else]
+			[listwords words=[url][tValueList][/url][tDelim]]
+				[text]tValue=[math]0[getchars start=1&end=100&trim=both][word][/getchars][/math][/text]
+				[if [index]=1][then]
+					[text]tMax=[tValue][/text]
+				[/then][else]
+					[if [tValue]>[tMax]][then][text]tMax=[tValue][/text][/then][/if]
+				[/else][/if]
+			[/listwords]
+		[/else][/if]
+	[/else][/if]
+	
+	[return][tMax][/return]
+[/function]
+
+[function name=butInc]
+	[text multi=T]tGood=T&tVar=&tMath=F&tInc=1&tError=[/text]
+
+	[if ("[url][params_string][/url]"^"[url]=[/url]")][then]
+		[if ("[url][params_string][/url]"^"[url]TextVar=[/url]")][then]
+			[text]tVar=[getchars start=1&end=50&trim=both][:local:TextVar][/getchars][/text]
+		[/then][else]
+			[if ("[url][params_string][/url]"^"[url]MathVar=[/url]")][then]
+				[text]tVar=[getchars start=1&end=50&trim=both][:local:MathVar][/getchars][/text]
+				[text]tMath=T[/text]
+			[/then][/if]
+		[/else][/if]
+	[/then][else]
+		[text]tVar=[getchars start=1&end=50&trim=both][params_string][/getchars][/text]
+	[/else][/if]
+	
+	[if "[url][tVar][/url]"=""][then]
+		[text]tError=No TextVar or MathVar parameter to butInc function.[/text]
+	[/then][else]
+		[showif [url][params_string][/url]^[url]By=[/url]][text]tInc=[math]0[getchars start=1&end=20&trim=both][:local:By][/getchars][/math][/text][/showif]
+
+		[if "[tMath]"="T"][then]
+			[math show=F&scope=Global][tVar]=[interpret][:Global:[tVar]][/interpret]+([tInc])[/math]
+		[/then][else]
+			[text scope=Global][tVar]=[math][interpret][:Global:[tVar]][/interpret]+([tInc])[/math][/text]
+		[/else][/if]
+	[/else][/if]
+	
+	[return][tError][/return]
+[/function]
+
+[function name=butDec]
+	[text multi=T]tGood=T&tVar=&tMath=F&tDec=1&tError=[/text]
+
+	[if ("[url][params_string][/url]"^"[url]=[/url]")][then]
+		[if ("[url][params_string][/url]"^"[url]TextVar=[/url]")][then]
+			[text]tVar=[getchars start=1&end=50&trim=both][:local:TextVar][/getchars][/text]
+		[/then][else]
+			[if ("[url][params_string][/url]"^"[url]MathVar=[/url]")][then]
+				[text]tVar=[getchars start=1&end=50&trim=both][:local:MathVar][/getchars][/text]
+				[text]tMath=T[/text]
+			[/then][/if]
+		[/else][/if]
+	[/then][else]
+		[text]tVar=[getchars start=1&end=50&trim=both][params_string][/getchars][/text]
+	[/else][/if]
+	
+	[if "[url][tVar][/url]"=""][then]
+		[text]tError=No TextVar or MathVar parameter to butDec function.[/text]
+	[/then][else]
+		[showif [url][params_string][/url]^[url]By=[/url]][text]tDec=[math]0[getchars start=1&end=20&trim=both][:local:By][/getchars][/math][/text][/showif]
+
+		[if "[tMath]"="T"][then]
+			[math show=F&scope=Global][tVar]=[interpret][:Global:[tVar]][/interpret]-([tDec])[/math]
+		[/then][else]
+			[text scope=Global][tVar]=[math][interpret][:Global:[tVar]][/interpret]-([tDec])[/math][/text]
+		[/else][/if]
+	[/else][/if]
+	
+	[return][tError][/return]
+[/function]
+
+[function name=butExponent]
+	[text]uParams=[url][params_string][/url][/text]
+	[text]tValue=[butFunctionParam name=value&default=10&params=[uParams]][/text]
+	[text]tPower=[butFunctionParam name=power&default=1&params=[uParams]][/text]
+
+	[math show=F]mResult=[tValue][/math]
+	[if [tPower]>0][then]
+		[loop start=2&end=[tPower]]
+			[math show=F]mResult=[mResult]*[tValue][/math]
+		[/loop]
+	[/then][else]
+		[loop start=0&end=[tPower]&advance=-1]
+			[math show=F]mResult=[mResult]/[tValue][/math]
+		[/loop]
+	[/else][/if]
+	[return][mResult][/return]
+[/function]
+
+[function name=butRound]
+	[text]uParams=[url][params_string][/url][/text]
+	[text]tValue=[butFunctionParam name=value&default=[uParams]&params=[uParams]][/text]
+	[text]tPrecision=[butFunctionParam name=precision&default=0&params=[uParams]][/text]
+	
+	[text]tFactor=[butExponent power=[tPrecision]][/text]
+	[return][math]floor([tValue]*[tFactor]+.5)/[tFactor][/math][/return]
+[/function]
+
+[function name=butRandom]
+	[text]tType=[if ("[url]&[params_string][/url]"^"[url]&type=F[/url]")][then]F[/then][else]I[/else][/if][/text]
+	[text]tMin=[if ("[url]&[params_string][/url]"^"[url]&min=[/url]")][then][:local:min][/then][else]0[/else][/if][/text]
+	[text]tMax=[if ("[url]&[params_string][/url]"^"[url]&max=[/url]")][then][:local:max][/then][else][if "[tType]"="F"][then]1.0[/then][else]99[/else][/if][/else][/if][/text]
+	
+	[showif [tType]=I][text]tMax=[math][tMax]+1[/math][/text][/showif]
+	[math]mR=[random format=float]*([tMax]-[tMin])+[tMin][/math]
+	[showif [tType]=I]
+		[math]mR=floor([mR])[/math][/showif]
+		[!][showif [mR]>[tMax]][math]mR=[tMax][/math][/showif][/!]
+	[return][mR][/return]
+[/function]
+
+[function name=butGetWebDNAPref]
+	[text]uParams=[url][params_string][/url][/text]
+	[text]tKey=[butFunctionParam name=key&default=[uParams]&params=[uParams]][/text]
+	[text]tDefault=[butFunctionParam name=default&default=&params=[uParams]][/text]
+	[text]tValue=[search db=WebCatalog Prefs&eqpreferencedatarq=[url][tKey][/url]&max=1][founditems][value][/founditems][/search][/text]
+	[if "[tValue]"^"DBError"][then]
+		[text]tValue=[search db=webdna.ini&eqpreferencedatarq=[url][tKey][/url]&max=1][founditems][value][/founditems][/search][/text]
+	[/then][/if]
+	[if ("[url][tValue][/url]"^"DBError") | ("[url][tValue][/url]"="")][then]
+		[text]tValue=[tDefault][/text]
+	[/then][/if]
+	[return][tValue][/return]
+[/function]
+
+[function name=butDefaultValue]
+	[text]tValue=[butFunctionParam name=value&params=[url][params_string][/url]][/text]
+	[showif [url][tValue][/url]=]
+		[text]tValue=[butFunctionParam name=default&params=[url][params_string][/url]][/text]
+	[/showif]
+	[return][tValue][/return]
+[/function]
+
+[function name=butEndsWith]
+	[text]tLength=[countchars][:local:find][/countchars][/text]
+	[return][if "[getchars start=1&end=[tLength]&from=end][:local:string][/getchars]"="[:local:find]"][then]1=1[/then][else]1=0[/else][/if][/return]
+[/function]
+
+[function name=butTrim]
+	[text]t=[if "[url][params_string][/url]"^"%25"][then][unurl][params_string][/unurl][/then][else][params_string][/else][/if][/text]
+	[return][grep search=[%0B%09%1D%20]*[%0D%0A%0B][%0D%0A%0B%09%1D%20]*&replace=][butCR][t][butCR][/grep][/return]
+[/function]
+
+[function name=butShowHTML]
+	[return][grep search=%3C&replace=[url]&lt;[/url]][grep search=%3E&replace=[url]&gt;[/url]][unurl][params_string][/unurl][/grep][/grep][/return]
+[/function]
+
+[function name=butElapsedTime]
+	[text multi=T]tElapsed=0&tTicks=0[/text]
+
+	[text]uParams=[url][params_string][/url][/text]
+	[hideif [uParams]=]
+		[text]tElapsed=[butFunctionParam name=elapsed&params=[uParams]&default=[uParams]][/text]
+		[text]tTicks=[butFunctionParam name=tickspersecond&params=[uParams]&default=60][/text]
+	[/hideif]
+	[hideif [tElapsed]>0][text]tElapsed=[elapsedtime][/text][/hideif]
+	[hideif [tTicks]>0][text]tTicks=60[/text][/hideif]
+	
+	[text]tSeconds=[format 1.3f][math][tElapsed]/[tTicks][/math][/format][/text]
+	[if [tSeconds]<60][then]
+		[return][format 1.2f][tSeconds][/format][/return]
+	[/then][else]
+		[if [tSeconds]<3600][then]
+			[text]tMinutes=[math]floor([tSeconds]/60)[/math][/text]
+			[text]tSeconds=[math][tSeconds]-([tMinutes]*60)[/math][/text]
+			[return][tMinutes]:[showif [tSeconds]<10]0[/showif][format 1.2f][tSeconds][/format][/return]
+		[/then][else]
+			[text]tHours=[math]floor([tSeconds]/3600)[/math][/text]
+			[text]tSeconds=[math][tSeconds]-([tHours]*3600)[/math][/text]
+			[text]tMinutes=[math]floor([tSeconds]/60)[/math][/text]
+			[text]tSeconds=[math][tSeconds]-([tMinutes]*60)[/math][/text]
+			[return][tHours]:[showif [tMinutes]<10]0[/showif][tMinutes]:[showif [tSeconds]<10]0[/showif][format 1.2f][tSeconds][/format][/return]
+		[/else][/if]
+	[/else][/if]
+[/function]
+
+[function name=butPassword]
+	[text multi=T]tPass=&tLength=8&tLayout=&tCase=LOWER[/text]
+	[text]tLower=abcdefghijkmnopqrstuvwxyz[/text]
+	[text]tUpper=ABCDEFGHJKLMNPQRSTUVWXYZ[/text]
+	[text]tDigits=23456789[/text]
+	[text]tSpecial=!@#$%&*:;?[/text]
+	[text]tLength=8[/text]
+	
+	[showif [url]&[params_string][/url]^[url]&length=[/url]][text]tLength=[math]0[getchars start=1&end=2&trim=both][:local:length][/getchars][/math][/text][/showif]
+	[showif [url]&[params_string][/url]^[url]&Layout=[/url]][text]tLayout=[getchars start=1&end=99&trim=both][:local:Layout][/getchars][/text][/showif]
+	[showif [url]&[params_string][/url]^[url]&AlphaCase=[/url]][text]tCase=[getchars start=1&end=8&trim=both][:local:AlphaCase][/getchars][/text][/showif]
+	[showif [url]&[params_string][/url]^[url]&special=[/url]][text]tSpecial=[getchars start=1&end=99&trim=both][:local:special][/getchars][/text][/showif]
+
+	[if "[tLayout]"=""][then]
+		[text]tChars=[tDigits][tDigits][tSpecial][/text]
+		[switch value=[tCase]]
+			[case value=UPPER][text]tChars=[tChars][tUpper][/text][/case]
+			[case value=MIXED][text]tChars=[tChars][tChars][tUpper][tLower][/text][/case]
+			[default][text]tChars=[tChars][tLower][/text][/default]
+		[/switch]
+		[text]tMax=[countchars][tChars][/countchars][/text]
+		[loop start=1&end=[tLength]]
+			[text]tX=[math]ceil([random format=float]*[tMax])[/math][/text]
+			[text]tPass=[tPass][getchars start=[tX]&end=[tX]][tChars][/getchars][/text]
+		[/loop]
+	[/then][else]
+		[listchars chars=[url][tLayout][/url]]
+			[text]tKey=[char][/text]
+			[switch value=[tKey]]
+				[case value=X][text]tChars=[tUpper][tLower][/text][/case]
+				[case value=U][text]tChars=[tUpper][/text][/case]
+				[case value=L][text]tChars=[tLower][/text][/case]
+				[case value=V][text]tChars=aeiou[/text][/case]
+				[case value=9][text]tChars=[tDigits][/text][/case]
+				[case value=#][text]tChars=[tSpecial][/text][/case]
+				[case value=*][text]tChars=[tUpper][tLower][tDigits][tDigits][tSpecial][tSpecial][/text][/case]
+				[default][text]tPass=[tPass][tKey][/text][text]tChars=[/text][/default]
+			[/switch]
+			[text]tMax=[countchars][tChars][/countchars][/text]
+			[showif [tMax]>0]
+				[text]tX=[math]ceil([random format=float]*[tMax])[/math][/text]
+				[text]tPass=[tPass][getchars start=[tX]&end=[tX]][tChars][/getchars][/text]
+			[/showif]
+		[/listchars]
+	[/else][/if]
+
+	[return][tPass][/return]
+[/function]
+
+[function name=butIsDefined]
+	[text]tValue=[interpret][[params_string]][/interpret][/text]
+	[if "[url][tValue][/url]"="%5B[params_string]%5D"][then]
+		[text scope=global]butValue=[/text]
+		[return][butFalse][/return]
+	[/then][else]
+		[text scope=global]butValue=[tValue][/text]
+		[return][butTrue][/return]
+	[/else][/if]
+[/function]
+
+[function name=butNotDefined]
+	[text]tValue=[interpret][[params_string]][/interpret][/text]
+	[if "[url][tValue][/url]"="%5B[params_string]%5D"][then]
+		[text scope=global]butValue=[/text]
+		[return][butTrue][/return]
+	[/then][else]
+		[text scope=global]butValue=[tValue][/text]
+		[return][butFalse][/return]
+	[/else][/if]
+[/function]
+
+[function name=butIsTextVar]
+	[text]uParams=[url][params_string][/url][/text]
+	[text]tVarName=[butFunctionParam name=name&default=[uParams]&params=[uParams]][/text]
+	[text]tScope=[butFunctionParam name=scope&default=global&params=[uParams]][/text]
+
+	[text]tReply=[butFalse][/text]
+	[text scope=global]butValue=[/text]
+	[listvariables type=text&name=[tVarName]&scope=[tScope]]
+		[text]tReply=[butTrue][/text]
+		[text scope=global]butValue=[value][/text]
+	[/listvariables]
+	[return][tReply][/return]
+[/function]
+
+[function name=butIsMathVar]
+	[text]uParams=[url][params_string][/url][/text]
+	[text]tVarName=[butFunctionParam name=name&default=[uParams]&params=[uParams]][/text]
+	[text]tScope=[butFunctionParam name=scope&default=global&params=[uParams]][/text]
+
+	[text]tReply=[butFalse][/text]
+	[text scope=global]butValue=[/text]
+	[listvariables type=math&name=[tVarName]&scope=[tScope]]
+		[text]tReply=[butTrue][/text]
+		[text scope=global]butValue=[value][/text]
+	[/listvariables]
+	[return][tReply][/return]
+[/function]
+
+[function name=butIsFormVar]
+	[text]uParams=[url][params_string][/url][/text]
+	[text]tVarName=[butFunctionParam name=name&default=[uParams]&params=[uParams]][/text]
+
+	[text]tReply=[butFalse][/text]
+	[text scope=global]butValue=[/text]
+	[formvariables name=[tVarName]]
+		[text]tReply=[butTrue][/text]
+		[text scope=global]butValue=[value][/text]
+	[/formvariables]
+	[return][tReply][/return]
+[/function]
+
+[function name=butIsNumeric]
+	[text]tReply=[butTrue][/text]
+	[text]tNum=[if "[url][params_string][/url]"^"[url]number=[/url]"][then][:local:number][/then][else][params_string][/else][/if][/text]
+	[showif [url][tNum][/url]~[url]-[/url]][text]tNum=[getchars start=2&end=99][tNum][/getchars][/text][/showif]
+	[text]tDecimal=.[/text]
+	[showif [url][params_string][/url]^[url]decimal=[/url]][text]tDecimal=[:local:decimal][/text][/showif]
+	[listwords words=[url][tNum][/url]&delimiters=[tDecimal]]
+		[showif [index]>2][text]tReply=[butFalse][/text][/showif]
+		[showif [url][word][/url]![grep search=[^0-9]&replace=][word][/grep]][text]tReply=[butFalse][/text][/showif]
+	[/listwords]
+	[return][tReply][/return]
+[/function]
+
+[function name=butIsInteger]
+	[text]tReply=[butTrue][/text]
+	[text]tNegative=[/text]
+	[text]tNum=[if "[url][params_string][/url]"^"[url]number=[/url]"][then][:local:number][/then][else][params_string][/else][/if][/text]
+	[showif [url][tNum][/url]~[url]-[/url]][text]tNum=[getchars start=2&end=99][tNum][/getchars][/text][text]tNegative=-[/text][/showif]
+	[if "[url][tNum][/url]"!"[grep search=[^0-9]&replace=][tNum][/grep]"][then]
+		[text]tReply=[butFalse][/text]
+	[/then][else]
+		[showif [url][params_string][/url]^[url]min=[/url]]
+			[showif [:local:min]>[tNegative][tNum]][text]tReply=[butFalse][/text][/showif]
+		[/showif]
+		[showif [url][params_string][/url]^[url]max=[/url]]
+			[showif [:local:max]<[tNegative][tNum]][text]tReply=[butFalse][/text][/showif]
+		[/showif]
+	[/else][/if]
+	[return][tReply][/return]
+[/function]
+
+[function name=butIsAlpha]
+	[text]tVal=[if "[url]&[params_string][/url]"^"[url]&value=[/url]"][then][:local:value][/then][else][params_string][/else][/if][/text]
+
+	[if "[grep search=[^a-zA-Z]&replace=][tVal][/grep]"="[url][tVal][/url]"]
+		[then][return][butTrue][/return][/then]
+		[else][return][butFalse][/return][/else]
+	[/if]
+[/function]
+
+[function name=butIsAlphaNumeric]
+	[text]tVal=[if "[url]&[params_string][/url]"^"[url]&value=[/url]"][then][:local:value][/then][else][params_string][/else][/if][/text]
+
+	[if "[grep search=[^a-zA-Z0-9]&replace=][tVal][/grep]"="[url][tVal][/url]"]
+		[then][return][butTrue][/return][/then]
+		[else][return][butFalse][/return][/else]
+	[/if]
+[/function]
+
+[function name=butIsLower]
+	[text]tVal=[if "[url]&[params_string][/url]"^"[url]&value=[/url]"][then][:local:value][/then][else][params_string][/else][/if][/text]
+
+	[if "[url][encrypt][tVal][/encrypt][/url]"="[url][encrypt][lowercase][tVal][/lowercase][/encrypt][/url]"]
+		[then][return][butTrue][/return][/then]
+		[else][return][butFalse][/return][/else]
+	[/if]
+[/function]
+
+[function name=butIsUpper]
+	[text]tVal=[if "[url]&[params_string][/url]"^"[url]&value=[/url]"][then][:local:value][/then][else][params_string][/else][/if][/text]
+
+	[if "[url][encrypt][tVal][/encrypt][/url]"="[url][encrypt][uppercase][tVal][/uppercase][/encrypt][/url]"]
+		[then][return][butTrue][/return][/then]
+		[else][return][butFalse][/return][/else]
+	[/if]
+[/function]
+
+[function name=butIsEmpty]
+	[text]tReply=[butTrue][/text]
+	[text]tVar=[if "[url][params_string][/url]"^"[url]var=[/url]"][then][:local:var][/then][else][params_string][/else][/if][/text]
+	[showif [url][interpret][[tVar]][/interpret][/url]!][text]tReply=[butFalse][/text][/showif]
+	[return][tReply][/return]
+[/function]
+
+[function name=butIsFile]
+	[text]tReply=[butFalse][/text]
+	[text]tPath=[if "[url][params_string][/url]"^"[url]path=[/url]"][then][:local:path][/then][else][params_string][/else][/if][/text]
+	[fileinfo [tPath]][if ("[exists]"="T") & ("[isFile]"="T")][then][text]tReply=[butTrue][/text][/then][/if][/fileinfo]
+	[return][tReply][/return]
+[/function]
+
+[function name=butIsFolder]
+	[text]tReply=[butFalse][/text]
+	[text]tPath=[if "[url][params_string][/url]"^"[url]path=[/url]"][then][:local:path][/then][else][params_string][/else][/if][/text]
+	[fileinfo [tPath]][if ("[exists]"="T") & ("[isFolder]"="T")][then][text]tReply=[butTrue][/text][/then][/if][/fileinfo]
+	[return][tReply][/return]
+[/function]
+
+[function name=butExactMatch]
+	[text]tVal1=[if "[url]&[params_string][/url]"^"[url]&value1=[/url]"][then][:local:value1][/then][else][/else][/if][/text]
+	[text]tVal2=[if "[url]&[params_string][/url]"^"[url]&value2=[/url]"][then][:local:value2][/then][else][/else][/if][/text]
+
+	[if "[url][encrypt][tVal1][/encrypt][/url]"="[url][encrypt][tVal2][/encrypt][/url]"]
+		[then][return][butTrue][/return][/then]
+		[else][return][butFalse][/return][/else]
+	[/if]
+[/function]
+
+[function name=butIDTagComponents]
+	[text]tVal=[if "[url]&[params_string][/url]"^"[url]&value=[/url]"][then][:local:value][/then][else][params_string][/else][/if][/text]
+
+	[text scope=global&multi=T]butPrefix=&butNumber=&butSuffix=[/text]
+	[text]tState=suffix[/text]
+	[listchars chars=[url][tVal][/url]&from=end]
+		[text]tDigit=[if "0123456789"^"[url][char][/url]"][then][butTrue][/then][else][butFalse][/else][/if][/text]
+		[switch value=[tState]]
+		[case value=suffix]
+			[if [tDigit]][then]
+				[text]tState=number[/text]
+				[text scope=global]butNumber=[char][/text]
+			[/then][else]
+				[text scope=global]butSuffix=[char][butSuffix][/text]
+			[/else][/if]
+		[/case]
+		[case value=number]
+			[if [tDigit]][then]
+				[text scope=global]butNumber=[char][butNumber][/text]
+			[/then][else]
+				[text]tState=prefix[/text]
+				[text scope=global]butPrefix=[char][/text]
+			[/else][/if]
+		[/case]
+		[default]
+			[text scope=global]butPrefix=[char][butPrefix][/text]
+		[/default]
+		[/switch]
+	[/listchars]
+	[return][if "[butNumber]"=""][then][butFalse][/then][else][butTrue][/else][/if][/return]
+[/function]
+
+[function name=butCapitalize]
+	[text]tVal=[if "[url]&[params_string][/url]"^"[url]&value=[/url]"][then][:local:value][/then][else][params_string][/else][/if][/text]
+
+	[if [butIsUpper [tVal]]][then]
+		[return][capitalize][tVal][/capitalize][/return]
+	[/then][else]
+		[if [butIsLower [tVal]]][then]
+			[return][capitalize][tVal][/capitalize][/return]
+		[/then][else]
+			[return][tVal][/return]
+		[/else][/if]
+	[/else][/if]
+[/function]
+
+[function name=butSplitMixedCaseWord]
+	[text]tVal=[if "[url]&[params_string][/url]"^"[url]&value=[/url]"][then][:local:value][/then][else][params_string][/else][/if][/text]
+	[if [butIsUpper [tVal]]][then]
+		[return][tVal][/return]
+	[/then][else]
+		[text]tPrevKind=special[/text]
+		[listchars chars=[url][tVal][/url]]
+			[text]tKind=[if [butIsAlpha [char]]][then][if [butIsUpper [char]]][then]UPPER[/then][else]lower[/else][/if][/then][else]special[/else][/if][/text]
+			[switch value=[tKind]]
+			[case value=UPPER]	[return][hideif [index]=1][hideif [tPrevKind]=UPPER] [/hideif][/hideif][char][/return][/case]
+			[case value=lower]	[return][if "[tPrevKind]"="special"][then][hideif [index]=1] [/hideif][uppercase][char][/uppercase][/then][else][char][/else][/if][/return][/case]
+			[case value=special][return][hideif [tPrevKind]=special] [/hideif][char][/return][/case]
+			[default]			[return][char][/return][/default]
+			[/switch]
+			[text]tPrevKind=[tKind][/text]
+		[/listchars]
+	[/else][/if]
+	[return][/return]
+[/function]
+
+[function name=butTextSet]
+	[text scope=global][unurl][params_string][/unurl][/text]
+	[return][/return]
+[/function]
+
+[function name=butMathSet]
+	[text multi=T]tN=&tV=&tE=[/text]
+	[listwords words=[url][params_string][/url]&delimiters=[url]=[/url]]
+		[switch value=[index]]
+			[case value=1][text]tN=[word][/text][/case]
+			[case value=2][text]tV=[unurl][word][/unurl][/text][/case]
+			[default][text]tE=Invalid parameter to butMathSet function - do you need to URL the value?<br />[/text][/default]
+		[/switch]
+	[/listwords]
+	[if "[url][tE][/url]"=""][then]
+		[text scope=global][tN]=[math][tV][/math][/text]
+	[/then][/if]
+	[return][tE][/return]
+[/function]
+
+[function name=butArraySet]
+	[text multi=T]tA=&tX=&tV=&tE=[/text]
+	[listwords words=[url][params_string][/url]&delimiters=[url]()=[/url]]
+		[switch value=[index]]
+			[case value=1][text]tA=[word][/text][/case]
+			[case value=2][text]tX=[word][/text][/case]
+			[case value=3][text]tV=[unurl][word][/unurl][/text][/case]
+			[default][text]tE=Invalid parameter to butArraySet function - do you need to URL the value?<br />[/text][/default]
+		[/switch]
+	[/listwords]
+	[if ("[url][tA][/url]"="") | ("[url][tX][/url]"="")][then]
+		[text]tE=Missing parameters to butArraySet function<br />[/text]
+	[/then][else][if ("[url][tE][/url]"="")][then]
+		[text]tE=[arrayset name=[tA]&scope=global]([tX])=[tV][/arrayset][/text]
+	[/then][/if][/else][/if]
+
+	[return][tE][/return]
+[/function]
+
+[function name=butListToArray]
+	[text]tReply=[/text]
+	[if "[version]"<"5.1e"][then]
+		[text]tReply=**butListToArray FUNCTION REQUIRES WebDNA VERSION 5.1e OR LATER**[/text]
+	[/then][else]
+		[if "[url][params_string][/url]"^"[url]list=[/url]"][then]
+			[if "[url][params_string][/url]"^"[url]delimiters=[/url]"]
+				[then][text]tDelim=[:local:delimiters][/text][/then]
+				[else][text]tDelim=,[/text][/else]
+			[/if]
+			
+			[if "[url][params_string][/url]"^"[url]max=[/url]"]
+				[then][text]tMax=[:local:max][/text][/then]
+				[else][text]tMax=99999[/text][/else]
+			[/if]
+			
+			[text]tList=X[grep search=[url][[tDelim]][/url]&replace=[url][tDelim]X[/url]][:local:list][/grep][/text]
+	
+			[listwords words=[url][tList][/url]&delimiters=[url][tDelim][/url]]
+				[hideif [index]>[tMax]]
+					[text]tReply=[hideif [index]=1][tReply]&[/hideif]([index])=[showif [countchars][word][/countchars]>1][getchars start=2][url][word][/url][/getchars][/showif][/text]
+				[/hideif]
+			[/listwords]
+		[/then][else]
+			[text]tReply=**MISSING "List" PARAMETER TO butListToArray FUNCTION**[/text]
+		[/else][/if]
+	[/else][/if]
+	
+	[return][tReply][/return]
+[/function]
+
+[function name=butHost]
+	[text]tHost=[/text]
+	[ListMIMEHeaders name=HTTP_HOST&exact=T]
+		[showif [index]=1][text]tHost=[value][/text][/showif]
+	[/ListMIMEHeaders]
+	[showif [tHost]=]
+		[ListMIMEHeaders name=Host&exact=F]
+			[showif [index]=1][text]tHost=[value][/text][/showif]
+		[/ListMIMEHeaders]
+	[/showif]
+	[showif [tHost]^:]
+		[text]tHost=[ListWords words=[tHost]&delimiters=:][showif 1=[index]][word][/showif][/listwords][/text]
+	[/showif]
+	[return][tHost][/return]
+[/function]
+
+[function name=butMIMEDate]
+	[text]uParams=[url][params_string][/url][/text]
+	[text]tGMT=[butFunctionParam name=gmtoffset&default=&params=[uParams]][/text]
+	[text]tYears=[butFunctionParam name=years&default=&params=[uParams]][/text]
+	[text]tMonths=[butFunctionParam name=months&default=&params=[uParams]][/text]
+	[text]tDays=[butFunctionParam name=days&default=&params=[uParams]][/text]
+	[text]tHours=[butFunctionParam name=hours&default=&params=[uParams]][/text]
+	[text]tMinutes=[butFunctionParam name=minutes&default=&params=[uParams]][/text]
+	[text]tSeconds=[butFunctionParam name=seconds&default=&params=[uParams]][/text]
+	[text]tExpireDate=[butFunctionParam name=expiredate&default=&params=[uParams]][/text]
+	[text]tExpireTime=[butFunctionParam name=expiretime&default=&params=[uParams]][/text]
+	[text]tCookie=[butFunctionParam name=cookie&default=F&params=[uParams]][/text]
+
+	[showif [tGMT]=]
+		[text]tGMT=[butTrim [shell]date +%z[/shell]][/text]
+		[if [butIsInteger [tGMT]]][then]
+			** Formatted like "-0800" - we need to make that into "-8" **
+			[text]tGMT=[math][tGMT]/100[/math][/text]
+		[/then][else]
+			[text]tGMT=0[/text]
+		[/else][/if]
+	[/showif]
+
+	[text]tDate=[butToday][/text]
+	[text]tTime=[butNow][/text]
+	
+	[showif [url][tExpireDate][/url]!]
+		[if [butIsInteger [url][tExpireDate][/url]]][then]
+			[text]tDate=[tExpireDate][/text]
+		[/then][else]
+			[text]tDate=[math]{[tExpireDate]}[/math][/text]
+			[showif [tDate]=0][text]tDate=[butToday][/text][/showif]
+		[/else][/if]
+	[/showif]
+
+	[showif [url][tExpireTime][/url]!]
+		[if [butIsNumeric [url][tExpireTime][/url]]][then]
+			[text]tTime=[tExpireTime][/text]
+		[/then][else]
+			[text]tTime=[math]{[tExpireTime]}[/math][/text]
+		[/else][/if]
+	[/showif]
+	
+	[showif [url][tYears][/url]>0]
+		[text]tDate=[format 1.0f][math][tDate]+(365.25*[tYears])[/math][/format][/text]
+	[/showif]
+	
+	[showif [url][tMonths][/url]>0]
+		[text]tDate=[math][tDate]+{0/[tMonths]/0}[/math][/text]
+	[/showif]
+	
+	[showif [url][tDays][/url]>0]
+		[text]tDate=[math][tDate]+[tDays][/math][/text]
+	[/showif]
+	
+	[showif [url][tHours][/url]>0]
+		[text]tTime=[math][tTime]+(3600*[tHours])[/math][/text]
+	[/showif]
+	
+	[showif [url][tMinutes][/url]>0]
+		[text]tTime=[math][tTime]+(60*[tMinutes])[/math][/text]
+	[/showif]
+	
+	[showif [url][tSeconds][/url]>0]
+		[text]tTime=[math][tTime]+[tSeconds][/math][/text]
+	[/showif]
+	
+	[text]tTime=[math][tTime]-([tGMT]*3600)[/math][/text]
+
+	[showif [tTime]>86400]
+		[text]tDays=[math]([tTime]-([tTime]%86400))/86400[/math][/text]
+		[text]tDate=[math][tDate]+[tDays][/math][/text]
+		[text]tTime=[math][tTime]%86400[/math][/text]
+	[/showif]
+	[showif [tTime]<0]
+		[text]tDate=[math][tDate]-1[/math][/text]
+		[text]tTime=[math][tTime]+86400[/math][/text]
+	[/showif]
+	
+	[if "[tCookie]"="T"][then]
+		[text]tDate=[format days_to_date %A, %d %b %Y][tDate][/format][/text]
+	[/then][else]
+		[text]tDate=[format days_to_date %a, %d %b %Y][tDate][/format][/text]
+	[/else][/if]
+	[text]tTime=[butSecondsToTime seconds=[tTime]&timeformat=%H:%M:%S] GMT[/text]
+
+	[return][tDate] [tTime][/return]
+[/function]
+
+[function name=butCookieExpire][butMIMEDate [params_string]&cookie=T][/function]
+
+[function name=butCookieDomain]
+	[text]tReply=[/text]
+	
+	[text]tHost=[butHost][/text]
+
+	[text]tTemp=[CountWords delimiters=.][tHost][/CountWords][/text]
+	[showif [tTemp]=2][text]tReply=.[tHost][/text][/showif]
+	[showif [tTemp]=4]
+		[text]tNumeric=T[/text]
+		[listwords words=[tHost]&delimiters=.][text]tld=[word][/text][/listwords]
+		[showif [math]0[tld][/math]>0][text]tReply=[tHost][/text][/showif]
+	[/showif]
+	[showif [tReply]=]
+	[listwords words=[tHost]&delimiters=.]
+		[showif [index]!1][text]tReply=[tReply].[word][/text][/showif]
+	[/listwords]
+	[/showif]
+
+	[return][tReply][/return]
+[/function]
+
+[function name=butSiteRoot]
+	[text multi=T]tReply=&tDepth=0[/text]
+	
+	[text]tDepth=[math][countwords delimiters=/][thisURL][/countwords]-1[/math][/text]
+	[if ([tDepth]>0) & ("[url][params_string][/url]"^"[url]devpath=[/url]")][then]
+		[text]tDevPath=[getchars start=1&end=999&trim=both][:local:devpath][/getchars][/text]
+		[hideif [url][tDevPath][/url]~[url]/[/url]][text]tDevPath=/[tDevPath][/text][/hideif]
+		[showif [url][thisurl][/url]~[url][tDevPath][/url]]
+		 	[text]tDepth=[math][tDepth]-[countwords delimiters=/][url][tDevPath][/url][/countwords][/math][/text]
+		[/showif]
+	[/then][/if]
+	[loop start=1&end=[tDepth]][text]tReply=[tReply]../[/text][/loop]
+	[return][tReply][/return]
+[/function]
+
+[function name=butThisPage]
+	[text]tReply=[/text]
+
+	[listwords words=[url][thisfile][/url]&delimiters=/][text]tReply=[word][/text][/listwords]
+	[return][tReply][/return]
+[/function]
+
+[function name=butSortList]
+	[text multi=T]tGood=T&tValueList=&tSorted=&tType=&tDelim=&tComma=,&tReverse=[/text]
+
+	[if ("[url][params_string][/url]"^"[url]valuelist=[/url]")][then]
+		[text]tValueList=[getchars start=1&end=10000&trim=both][:local:valuelist][/getchars][/text]
+	[/then][else]
+		[text]tValueList=[getchars start=1&end=10000&trim=both][unurl][params_string][/unurl][/getchars][/text]
+	[/else][/if]
+	
+	[if "[url][tValueList][/url]"=""][then]
+		[text]tSorted=Missing "ValueList" parameter to butSortList function call.[/text]
+	[/then][else]
+		[showif [url][params_string][/url]^[url]type=[/url]]
+			[text]tType=[getchars start=1&end=5&trim=both][:local:Type][/getchars][/text]
+			[if "_num_date_time_"^"_[tType]_"][then]
+				[text]tType=&valType=[tType][/text]
+			[/then][else]
+				[text]tType=[/text]
+			[/else][/if]
+		[/showif]
+
+		[showif [url][params_string][/url]^[url]reverse=[/url]]
+			[text]tReverse=[getchars start=1&end=5&trim=both][:local:Reverse][/getchars][/text]
+			[if "T"="[tReverse]"][then]
+				[text]tReverse=de[/text]
+			[/then][else]
+				[text]tReverse=[/text]
+			[/else][/if]
+		[/showif]
+
+		[showif [url][params_string][/url]^[url]delimiters=[/url]]
+			[text]tDelim=&delimiters=[url][:local:Delimiters][/url][/text]
+			[text]tComma=[getchars start=1&end=1][:local:Delimiters][/getchars][/text]
+		[/showif]
+		
+		[table name=list&fields=val]
+[listwords words=[url][tValueList][/url][tDelim]][word]
+[/listwords][/table]
+
+		[search table=list&neValdatarq=[blank]&allhit=1&[tReverse]valSort=1[tType]][founditems]
+			[text]tSorted=[showif [index]>1][tSorted][tComma][/showif][val][/text]
+		[/founditems][/search]
+	[/else][/if]
+	
+	[return][tSorted][/return]
+[/function]
+
+[function name=butUpdateList]
+	[text]uParams=[url][params_string][/url][/text]
+	[text]uDelimiter=[url][butFunctionParam name=delimiters&params=[uParams]&default=[url][butFunctionParam name=delimiter&params=[uParams]&default=,][/url]][/url][/text]
+	[text]uOldList=[uDelimiter][url][butFunctionParam name=list&params=[uParams]][/url][uDelimiter][/text]
+	[text]uAddList=[uDelimiter][url][butFunctionParam name=add&params=[uParams]][/url][uDelimiter][/text]
+	[text]uDeleteList=[uDelimiter][url][butFunctionParam name=delete&params=[uParams]][/url][uDelimiter][/text]
+	
+	[text]uNewList=[/text]
+	[listwords words=[uOldList]&delimiters=[uDelimiter]]
+		[hideif [uDeleteList]^[uDelimiter][url][word][/url][uDelimiter]]
+			[text]uNewList=[hideif [uNewList]=][uNewList][uDelimiter][/hideif][word][/text]
+		[/hideif]
+	[/listwords]
+	
+	[listwords words=[uAddList]&delimiters=[uDelimiter]]
+		[hideif [uDelimiter][uNewList][uDelimiter]^[uDelimiter][url][word][/url][uDelimiter]]
+			[text]uNewList=[hideif [uNewList]=][uNewList][uDelimiter][/hideif][word][/text]
+		[/hideif]
+	[/listwords]
+
+	[return][unurl][uNewList][/unurl][/return]
+[/function]
+	
+[function name=butWordList]
+	[text]uParams=[url][params_string][/url][/text]
+	[text]uOldWords=[url][butFunctionParam name=words&params=[uParams]][/url][/text]
+	[text]uAddWords=[url][butFunctionParam name=add&params=[uParams]][/url][/text]
+	[text]uExcludeWords=[url][butFunctionParam name=exclude&params=[uParams]][/url][/text]
+	[text]uDelim=[url][butFunctionParam name=delimiters&params=[uParams]&default=[url][butFunctionParam name=delimiter&params=[uParams]&default=,][/url]][/url][/text]
+
+	[return][butUpdateList list=[uOldWords]&delimiter=[uDelim]&add=[uAddWords]&delete=[uExcludeWords]][/return]
+[/function]
+
+[function name=butListContainsItem]
+	[text]uParams=[url][params_string][/url][/text]
+	[text]uDelimiter=[url][butFunctionParam name=delimiters&params=[uParams]&default=[url][butFunctionParam name=delimiter&params=[uParams]&default=,][/url]][/url][/text]
+	[text]uList=[url][butFunctionParam name=list&params=[uParams]&default=][/url][/text]
+	[text]uItems=[url][butFunctionParam name=items&params=[uParams]&default=[butFunctionParam name=item&params=[uParams]&default=]][/url][/text]
+	[text]tAll=[if "[url][butFunctionParam name=all&params=[uParams]&default=F][/url]"="T"][then][butTrue][/then][else][butFalse][/else][/if][/text]
+	[text]tExact=[if "[url][butFunctionParam name=exact&params=[uParams]&default=F][/url]"="T"][then][butTrue][/then][else][butFalse][/else][/if][/text]
+	
+	[text scope=global]butValue=0[/text]
+	[text]tSuccess=[tAll][/text]
+	[listwords words=[uItems]&delimiters=[uDelimiter]]
+		[text]uFind=[url][word][/url][/text]
+		[text]tFound=[butFalse][/text]
+		[listwords words=[uList]&delimiters=[uDelimiter]][hideif [tFound]]
+			[if "[url][word][/url]"="[uFind]"][then]
+				[text]tFound=[if ([tExact])][then][butExactMatch value1=[uFind]&value2=[url][word][/url]][/then][else][butTrue][/else][/if][/text]
+				[showif [tFound]]
+					[if ([butValue]=0) | ([index]<[butValue])][then][text scope=global]butValue=[index][/text][/then][/if]
+					[break] ** only works in 8.1 or later, else ignored
+				[/showif]
+			[/then][/if]
+		[/hideif][/listwords]
+		[if [tFound]][then]
+			[hideif [tAll]][text]tSuccess=[butTrue][/text][/hideif]
+		[/then][else]
+			[showif [tAll]]
+				[text]tSuccess=[butFalse][/text]
+				[text scope=global]butValue=0[/text] ** in case we set it
+				[break] ** only works in 8.1 or later, else ignored
+			[/showif]
+		[/else][/if]
+	[/listwords]
+
+	[return][tSuccess][/return]
+[/function]
+
+[function name=butListPosition]
+	[text]uParams=[url][params_string][/url][/text]
+	[text]uDelimiter=[url][butFunctionParam name=delimiters&params=[uParams]&default=[url][butFunctionParam name=delimiter&params=[uParams]&default=,][/url]][/url][/text]
+	[text]uList=[uDelimiter][url][butFunctionParam name=list&params=[uParams]&default=][/url][uDelimiter][/text]
+	[text]uItem=[url][butFunctionParam name=item&params=[uParams]&default=][/url][/text]
+	[text]tExact=[if "[url][butFunctionParam name=exact&params=[uParams]&default=F][/url]"="T"][then][butTrue][/then][else][butFalse][/else][/if][/text]
+
+	[text]tIndex=0[/text]
+	[listwords words=[uList]&delimiters=[uDelimiter]][hideif [tIndex]>0]
+		[text]tFound=[if ([tExact])][then][butExactMatch value1=[uItem]&value2=[url][word][/url]][/then][else][if "[uItem]"="[url][word][/url]"][then][butTrue][/then][else][butFalse][/else][/if][/else][/if][/text]
+		[showif [tFound]]
+			[text]tIndex=[index][/text]
+			[break] ** only works in 8.1 or later, else ignored
+		[/showif]
+	[/hideif][/listwords]
+	[return][tIndex][/return]
+[/function]
+
+[function name=butGetListItem][butGetWord [params_string]][/function]
+[function name=butGetWord]
+	[text]uParams=[url][params_string][/url][/text]
+	[text]uWords=[url][butFunctionParam name=words&params=[uParams]&default=[url][butFunctionParam name=list&params=[uParams]][/url]][/url][/text]
+	[text]tX=[butFunctionParam name=index&params=[uParams]][/text]
+	[text]uDelim=[url][butFunctionParam name=delimiters&params=[uParams]&default=[url][butFunctionParam name=delimiter&params=[uParams]][/url]][/url][/text]
+	
+	[listwords words=[uWords][hideif [uDelim]=]&delimiters=[uDelim][/hideif]]
+		[showif [index]=[tX]][return][word][/return][/showif]
+	[/listwords]
+	[return][/return]
+[/function]
+
+[function name=butAuthorizeNet]
+	[text]tCR=[unurl]%0D%0A[/unurl][/text]
+
+	[if ("[url][params_string][/url]"^"[url]system=[/url]")][then]
+		[text]tSystem=[getchars start=1&end=10&trim=both][:local:system][/getchars][/text]
+	[/then][else]
+		[text]tSystem=[getchars start=1&end=10&trim=both][unurl][params_string][/unurl][/getchars][/text]
+	[/else][/if]
+	
+	[text]tHost=secure.authorize.net[/text]
+	[text]tPage=/gateway/transact.dll[/text]
+	[text]tPost=x_version=3.1&x_delim_data=TRUE[/text]
+	[showif [url][certification][/url]=T]
+		[text]tHost=certification.authorize.net[/text]
+	[/showif]
+	[showif [url][groworganic][/url]=T]
+		[text]tHost=secure.groworganic.com[/text]
+		[text]tPage=/gateway/transact.tpl[/text]
+	[/showif]
+	
+	[text]tDelim=,[/text]
+	[showif [url][delim_char][/url]!%5Bdelim_char%5D][text]tDelim=[delim_char][/text][/showif]
+	[showif [url][x_delim_char][/url]!%5Bx_delim_char%5D][text]tDelim=[x_delim_char][/text][/showif]
+	
+	[text]tSkipParams=:x_certification:x_groworganic:[/text]
+	[listwords words=[url][params_string][/url]&delimiters=[url]&[/url]]
+		[text]tName=[middle endbefore=[url]=[/url]][word][/middle][/text]
+		[hideif [tName]~x_][text]tName=x_[tName][/text][/hideif]
+		[hideif [tSkipParams]^:[tName]:]
+			[text]tValue=[middle startafter=[url]=[/url]][word][/middle][/text]
+			[text]tPost=[tPost]&[tName]=[tValue][/text]
+		[/hideif]
+	[/listwords]
+	
+	[writefile but_post.txt][tPost][/writefile]
+	[text]tResponse=[TCPConnect host=[tHost]&port=443&ssl=T][!]
+	[/!][TCPSend]POST [tPage] HTTP/1.0[tCR][!]
+		[/!]User-Agent: BrainAuthorize[tCR][!]
+		[/!]Content-type: application/x-www-form-urlencoded[tCR][!]
+		[/!]Content-length: [countchars][tPost][/countchars][tCR][tCR][!]
+		[/!][tPost][tCR][!]
+		[/!][/TCPSend][!]
+	[/!][/TCPConnect][/text]
+	[text]tResponse=[getchars start=1&end=9999&trim=both][unurl][middle startafter=[url]%0D%0A%0D%0A[/url]&endbefore=][url][tResponse][/url][/middle][/unurl][/getchars][/text]
+
+	[text scope=global]butResponse=[tResponse][/text]
+	[writefile but_response.txt][butResponse][/writefile]
+
+	[if "[url][tResponse][/url]"~"[url]1[tDelim][/url]"][then]
+		[text]tReply=[butTrue][/text]
+	[/then][else]
+		[text]tReply=[butFalse][/text]
+	[/else][/if]
+	[return][tReply][/return]
+[/function]
+
+[function name=butTCPFetch]
+	[text]tCR=[unurl]%0D%0A[/unurl][/text]
+	[text multi=T]tContent=&tHeaders=&tAfter=&tBefore=&tPort=80&tSSL=F&tHost=&tPage=&tSkip=F&tPost=[/text]
+	
+	[text]uParams=[url][params_string][/url][/text]
+	[if "[url]&[/url][uParams]"^"[url]&address=[/url]"][then]
+		[text]tURL=[:local:address][/text]
+		[text]tAfter=[butFunctionParam name=startafter&params=[uParams]][/text]
+		[text]tBefore=[butFunctionParam name=endbefore&params=[uParams]][/text]
+		[text]tSkip=[butFunctionParam name=skipheader&params=[uParams]][/text]
+		[text]tPost=[butFunctionParam name=post&params=[uParams]][/text]
+	[/then][else]
+		[text]tURL=[params_string][/text]
+	[/else][/if]
+
+	[showif [url][tURL][/url]^[url]https://[/url]]
+		[text]tPort=443[/text]
+		[text]tSSL=T[/text]
+	[/showif]
+	
+	[listwords words=[url][tURL][/url]&delimiters=[url]/[/url]]
+		[if "[url][tHost][/url]"=""][then]
+			[hideif [url][word][/url]^http][text]tHost=[word][/text][/hideif]
+		[/then][else]
+			[text]tPage=[tPage]/[word][/text]
+		[/else][/if]
+	[/listwords]
+	[if [butEndsWith string=[url][tURL][/url]&find=[url]/[/url]]][then]
+		[text]tPage=[tPage]/[/text]
+	[/then][/if]
+	
+	[if "[url][tPost][/url]"=""][then]
+		[text]tSend=GET [tPage] HTTP/1.0[tCR][!]
+				[/!]Referer: http://[butHost][thisurl][tCR][!]
+				[/!]Host: [tHost][tCR][tCR][!]
+				[/!]USER-AGENT: Mozilla/4.0 (compatible; MSIE 5.01; Windows NT 5.0)[tCR][tCR][!]
+		[/!][/text]
+	[/then][else]
+		[text]tSend=POST [tPage] HTTP/1.0[tCR][!]
+				[/!]Referer: http://[butHost][thisurl][tCR][!]
+				[/!]Host: [tHost][tCR][!]
+				[/!]USER-AGENT: Mozilla/4.0 (compatible; MSIE 5.01; Windows NT 5.0)[tCR][!]
+				[/!]Content-type: text/namevalue[tCR][!]
+				[/!]Content-Length: [CountChars][tPost][/CountChars][UnURL]%0D%0A[/UnURL][!]
+				[/!][tCR][!]
+				[/!][tPost][tCR][tCR][!]
+		[/!][/text]
+	[/else][/if]
+
+	[if "[tHost]"!""][then]
+		[tcpconnect host=[tHost]&port=[tPort]&ssl=[tSSL]]
+			[text]tContent=[tcpsend skipheader=[tSkip]][tSend][/tcpsend][/text]
+		[/tcpconnect]
+		[hideif [tSkip]=T]
+			[text]tTemp=[middle startafter=%0D%0A%0D%0A][tContent][/middle][/text]
+			[text]tHeaders=[getchars start=1&end=[math][countchars][tContent][/countchars]-[countchars][tTemp][/countchars][/math]&trim=both][tContent][/getchars][/text]
+			[text]tContent=[tTemp][/text]
+			[text]tTemp=[/text]
+		[/hideif]
+		
+		[hideif [url][tAfter][tBefore][/url]=]
+			[text]tContent=[middle startafter=[url][tAfter][/url]&endbefore=[url][tBefore][/url]][tContent][/middle][/text]
+		[/hideif]
+	[/then][/if]
+	
+	[text scope=global]butHeaders=[tHeaders][/text]
+	[return][tContent][/return]
+[/function]
+
+[function name=butShowNonBlank]
+	[text]uParams=[url][params_string][/url][/text]
+	[text]tValue=[butFunctionParam name=value&params=[uParams]][/text]
+	[text]tPrefix=[butFunctionParam name=prefix&params=[uParams]][/text]
+	[text]tSuffix=[butFunctionParam name=suffix&params=[uParams]][/text]
+
+	[if "[url][tValue][/url]"=""][then]
+		[return][/return]
+	[/then][else]
+		[return][tPrefix][tValue][tSuffix][/return]
+	[/else][/if]
+[/function]
+
+[function name=butAddressFormat]
+	[text]uParams=[url][params_string][/url][/text]
+	[text]tAddress=[butFunctionParam name=address&params=[uParams]][/text]
+	[text]tCity=[butFunctionParam name=city&params=[uParams]][/text]
+	[text]tState=[butFunctionParam name=state&params=[uParams]][/text]
+	[text]tZip=[butFunctionParam name=zip&params=[uParams]][/text]
+	[text]tCountry=[butFunctionParam name=country&params=[uParams]][/text]
+	[text]tValue=[/text]
+	[text]tBreak=[butFunctionParam name=break&params=[uParams]&default=[url]<br />[/url]][/text]
+	
+	[hideif [url][tAddress][tCity][tState][tZip][tCountry][/url]=]
+		[listwords words=[url][tAddress][/url]&delimiters=%0A%0B%0D]
+			[text]tValue=[hideif [url][tValue][/url]=][tValue][tBreak][/hideif][if "[url][tBreak][/url]"^"[url]<[/url]"][then][butTextMap [word]][/then][else][butTextMapRaw [word]][/else][/if][/text]
+		[/listwords]
+		[text]tCityLine=[hideif [url][tCity][/url]=][tCity][hideif [url][tState][tZip][/url]=], [/hideif][/hideif][/text]
+		[text]tCityLine=[tCityLine][hideif [url][tState][/url]=][tState][hideif [url][tZip][/url]=] [/hideif][/hideif][/text]
+		[text]tCityLine=[tCityLine][tZip][/text]
+		[hideif [url][tCityLine][/url]=][text]tValue=[hideif [url][tValue][/url]=][tValue][tBreak][/hideif][tCityLine][/text][/hideif]
+		[hideif [tCountry]=]
+			[text]tValue=[hideif [url][tValue][/url]=][tValue][tBreak][/hideif][tCountry][/text]
+		[/hideif]
+	[/hideif]
+	
+	[return][tValue][/return]
+[/function]
+
+[function name=butPhoneFormat]
+	[text]tChars=0-9A-Z[/text]
+	[text]tFormat=(3)3-4?xN[/text]
+	[if "[url][params_string][/url]"^"[url]number=[/url]"][then]
+		[text]tNumber=[:local:number][/text]
+		[if "[url][params_string][/url]"^"[url]chars=[/url]"][then]
+			[text]tChars=[:local:chars][/text]
+		[/then][/if]
+		[if "[url][params_string][/url]"^"[url]phoneformat=[/url]"][then]
+			[text]tFormat=[:local:phoneformat][/text]
+		[/then][/if]
+	[/then][else]
+		[text]tNumber=[unurl][params_string][/unurl][/text]
+	[/else][/if]
+	
+	[text]tNumber=[grep search=[^[tChars]]&replace=][tNumber][/grep][/text]
+	[showif [countchars][tNumber][/countchars]=7]
+		[hideif [url][params_string][/url]^[url]phoneformat=[/url]]
+			// default to standard US phone w/o area code
+			[text]tFormat=3-4[/text]
+		[/hideif]
+	[/showif]
+	[text]tReply=[/text]
+	[text]tNumX=1[/text]
+	[text]tDone=[butFalse][/text]
+	[hideif [url][tNumber][/url]=]
+		[if "[version]"<"6"][then]
+			[loop start=1&end=[countchars][tFormat][/countchars]][hideif [tDone]]
+				[text]ch=[getchars start=[index]&end=[index]][tFormat][/getchars][/text]
+				[if "[url][ch][/url]"="N"][then]
+					[text]tReply=[tReply][getchars start=[tNumX]&end=9999][tNumber][/getchars][/text]
+					[text]tNumX=9999[/text]
+				[/then][else]
+					[if "[url][ch][/url]"="[url]?[/url]"][then]
+						[if ([tNumX]>[countchars][tNumber][/countchars])][then]
+							[text]tDone=[butTrue][/text]
+						[/then][/if]
+					[/then][else]
+						[if ("[url][ch][/url]"<"0") | ("[url][ch][/url]">"9")][then]
+							[text]tReply=[tReply][ch][/text]
+						[/then][else]
+							[text]tReply=[tReply][getchars start=[tNumX]&end=[math][tNumX]+[ch]-1[/math]][tNumber][/getchars][/text]
+							[text]tNumX=[math][tNumX]+[ch][/math][/text]
+						[/else][/if]
+					[/else][/if]
+				[/else][/if]
+			[/hideif][/loop]
+		[/then][else]
+			[listchars chars=[url][tFormat][/url]][hideif [tDone]]
+				[if "[url][char][/url]"="N"][then]
+					[text]tReply=[tReply][getchars start=[tNumX]&end=9999][tNumber][/getchars][/text]
+					[text]tNumX=9999[/text]
+				[/then][else]
+					[if "[url][char][/url]"="[url]?[/url]"][then]
+						[if ([tNumX]>[countchars][tNumber][/countchars])][then]
+							[text]tDone=[butTrue][/text]
+						[/then][/if]
+					[/then][else]
+						[if ("[url][char][/url]"<"0") | ("[url][char][/url]">"9")][then]
+							[text]tReply=[tReply][char][/text]
+						[/then][else]
+							[text]tReply=[tReply][getchars start=[tNumX]&end=[math][tNumX]+[char]-1[/math]][tNumber][/getchars][/text]
+							[text]tNumX=[math][tNumX]+[char][/math][/text]
+						[/else][/if]
+					[/else][/if]
+				[/else][/if]
+			[/hideif][/listchars]
+		[/else][/if]
+	[/hideif]
+
+	[return][tReply][/return]
+[/function]
+
+[function name=butAge]
+[text]uParams=[url][params_string][/url][/text]
+[text]tDOB=[butFunctionParam name=DOB&default=[uParams]&params=[uParams]][/text]
+[text]tAsOf=[butFunctionParam name=AsOf&default=[butToday]&params=[uParams]][/text]
+
+[hideif [butIsInteger [tDOB]]][text]tDOB=[math]{[tDOB]}[/math][/text][/hideif]
+[hideif [butIsInteger [tAsOf]]][text]tAsOf=[math]{[tAsOf]}[/math][/text][/hideif]
+[text scope=global]butFuture=[butFalse][/text]
+[if [tDOB]>[tAsOf]][then]
+	[text]tX=[tDOB][/text]
+	[text]tDOB=[tAsOf][/text]
+	[text]tAsOf=[tX][/text]
+	[text scope=global]butFuture=[butTrue][/text]
+[/then][/if]
+
+[text]tYears=[math][format days_to_date %Y][tAsOf][/format]-[format days_to_date %Y][tDOB][/format][/math][/text]
+[text]tMonths=[math][format days_to_date %m][tAsOf][/format]-[format days_to_date %m][tDOB][/format][/math][/text]
+[text]tDays=[math][format days_to_date %d][tAsOf][/format]-[format days_to_date %d][tDOB][/format][/math][/text]
+
+[showif [tDays]<0]
+	[text]tMonths=[math][tMonths]-1[/math][/text]
+	[text]tAmonth=[math][format days_to_date %m][tAsOf][/format][/math][/text]
+	[text]tAyear=[math][format days_to_date %Y][tAsOf][/format][/math][/text]
+	[text]tAdjust=[format days_to_date %d][math]{[tAmonth]/00/[tAyear]}[/math][/format][/text]
+	[text]tDays=[math][tDays]+([tAdjust])[/math][/text]
+[/showif]
+[showif [tMonths]<0]
+	[text]tYears=[math][tYears]-1[/math][/text]
+	[text]tMonths=[math][tMonths]+12[/math][/text]
+[/showif]
+
+[text scope=global]butDays=[tDays][/text]
+[text scope=global]butMonths=[tMonths][/text]
+[return][tYears][/return]
+[/function]
+
+[function name=butZip]
+	[text multi=T&scope=global]butResult=&butError=&butCommand=[/text]
+	[text]tGood=[butTrue][/text]
+
+	[if "[url]&[params_string][/url]"^"[url]&root=[/url]"][then]
+		[fileinfo [:local:root]]
+			[if "[exists]"="T"][then]
+				[if "[isfolder]"="T"][then]
+					[text]tRoot=[:local:root][hideif [url][getchars start=1&end=1&from=end][:local:root][/getchars][/url]=[url]/[/url]]/[/hideif][/text]
+					[text]tRootFull=[fullpath]/[/text]
+				[/then][else]
+					[text scope=global]butError=[butError]butZip: Root "[:local:root]" must specify a folder.<br />[/text]
+					[text]tGood=[butFalse][/text]
+				[/else][/if]
+			[/then][else]
+				[text scope=global]butError=[butError]butZip: Root "[:local:root]" not found.<br />[/text]
+				[text]tGood=[butFalse][/text]
+			[/else][/if]
+		[/fileinfo]
+	[/then][else]
+		[text scope=global]butError=[butError]butZip: Missing "root" parameter.<br />[/text]
+		[text]tGood=[butFalse][/text]
+	[/else][/if]
+	
+	[if "[url]&[params_string][/url]"^"[url]&files=[/url]"][then]
+		[text]tFiles=[:local:files][/text]
+	[/then][else]
+		[if "[url]&[params_string][/url]"^"[url]&file=[/url]"][then]
+			[text]tFiles=[:local:file][/text]
+		[/then][else]
+			[text]tFiles=*[/text]
+		[/else][/if]
+	[/else][/if]
+	
+	[if "[url]&[params_string][/url]"^"[url]&zipfile=[/url]"][then]
+		[text]tZipFile=[:local:zipfile][/text]
+	[/then][else]
+		[text scope=global]butError=[butError]butZip: Missing "zipfile" parameter<br />[/text]
+		[text]tGood=[butFalse][/text]
+	[/else][/if]
+	
+	[showif [tGood]]
+		[text]tRecursive=[if "[url]&[params_string][/url]"^"[url]&recursive=[/url]"][then][:local:recursive][/then][else]T[/else][/if][/text]
+		[text]tMove=[if "[url]&[params_string][/url]"^"[url]&move=[/url]"][then][:local:move][/then][else]F[/else][/if][/text]
+		[text]tClean=[if "[url]&[params_string][/url]"^"[url]&clean=[/url]"][then][:local:clean][/then][else]F[/else][/if][/text]
+		[text]tSkip=[if "[url]&[params_string][/url]"^"[url]&skip=[/url]"][then] [:local:skip][/then][else][/else][/if][/text]
+		
+		[hideif [tFiles]=*]
+			[listwords words=[tFiles]&delimiters= ]
+				[fileinfo [tRoot][word]]
+					[if "[exists]"="T"][else]
+						[text scope=global]butError=[butError]butZip: File/Folder "[word]" does not exist.<br />[/text]
+						[text]tGood=[butFalse][/text]
+					[/else][/if]
+				[/fileinfo]
+			[/listwords]
+		[/hideif]
+	[/showif]
+
+	[showif [tGood]]
+		[text]tDest=[fileinfo [tZipFile]][fullpath][/fileinfo][/text]
+		[if "[tDest]"=""][then]
+			[text]tFirst=[getchars start=1&end=1][tZipFile][/getchars][/text]
+			[if "*/^"^"[tFirst]"][then]
+				[text]tDest=[fileinfo [tFirst]][fullpath][/fileinfo]/[getchars start=2][tZipFile][/getchars][/text]
+			[/then][else]
+				[text]tDest=[fileinfo ./][fullpath][/fileinfo]/[tZipFile][/text]
+			[/else][/if]
+		[/then][else]
+			[showif [tClean]=T]
+				[deletefile [tZipFile]]
+				[showif [fileinfo [tZipFile]][exists][/fileinfo]=T]
+					[text scope=global]butError=[butError]Zip file "[tZipFile]" could not be deleted. Possibly a permissions problem.<br />[/text]
+					[text]tGood=[butFalse][/text]
+				[/showif]
+			[/showif]
+		[/else][/if]
+	[/showif]
+
+	[showif [tGood]]
+		[text scope=global]butCommand=cd [tRootFull];zip [hideif [tRecursive]=F]-r [/hideif][showif [tMove]=T]-m [/showif] [tDest] [tFiles] -x DS_Store */DS_Store */*/DS_Store[tSkip][/text]
+		[text scope=global]butResult=[unurl][grep search=[url]%0A[/url]&replace=[url]<br />%0D[/url]][url][shell][butCommand][/shell][/url][/grep][/unurl][/text]
+	[/showif]
+	[return][tGood][/return]
+[/function]
+		
+[function name=butLoadRecord]
+	[text]uParams=[url][params_string][/url][/text]
+	[text]tDB=[butFunctionParam name=db&params=[uParams]][/text]
+	[text]tParam=[butFunctionParam name=param&params=[uParams]][/text]
+	[text]tFieldsIn=[butFunctionParam name=fieldsin&params=[uParams]][/text]
+	[text]tPrefix=[butFunctionParam name=prefix&params=[uParams]][/text]
+	[text]tNotFound=[butFunctionParam name=notfound&params=[uParams]][/text]
+
+	[text]tGood=[butTrue][/text]
+	[text scope=global]butError=[/text]
+	
+	[if ("[url][tDB][/url]"="")][then]
+		[text scope=global]butError=butLoadRecord: Missing "db" parameter.[/text]
+		[text]tGood=[butFalse][/text]
+	[/then][/if]
+
+	[if ([tGood]) & ("[url][tParam][/url]"="")][then]
+		[text scope=global]butError=butLoadRecord: Missing "param" parameter.[/text]
+		[text]tGood=[butFalse][/text]
+	[/then][/if]
+	
+	[showif [tGood]]
+		[text]tFields=[/text]
+		[text]tCount=0[/text]
+		[if "[tFieldsIn]"!""][then]
+			[listfields [tDB]]
+				[text]tCount=[index][/text]
+				[listwords words=[tFieldsIn]][showif [word]=[fieldname]][text]tFields=[tFields][fieldname],[/text][/showif][/listwords]
+			[/listfields]
+		[/then][else]
+			[listfields [tDB]]
+				[text]tCount=[index][/text]
+				[text]tFields=[tFields][fieldname],[/text]
+			[/listfields]
+		[/else][/if]
+		[if [tCount]=0][then]
+			[text scope=global]butError=butLoadRecord: DB path "[tDB]" does not refer to a valid database file.[/text]
+			[text]tGood=[butFalse][/text]
+		[/then][else]
+			[if "[tFields]"=""][then]
+				[text scope=global]butError=butLoadRecord: No valid field names were specified in the Fields parameter.[/text]
+				[text]tGood=[butFalse][/text]
+			[/then][/if]
+		[/else][/if]
+	[/showif]
+	
+	[showif [tGood]]
+		[search db=[tDB]&[tParam]&max=1&data]
+			[if [numfound]=0][then]
+				[text scope=global]butError=butLoadRecord: No records found for (search db=[tDB]&[tParam]&max=1).[/text]
+				[if [tNotFound]][then]
+					[listwords words=[tFields]]
+						[text scope=global][tPrefix][word]=[/text]
+					[/listwords]
+				[/then][else]
+					[text]tGood=[butFalse][/text]
+				[/else][/if]
+			[/then][else]
+				[showif [numfound]>1]
+					[text scope=global]butError=butLoadRecord: [numfound] records were found for (search db=[tDB]&[tParam]&max=1), the first found record was used.[/text]
+				[/showif]
+				[founditems]
+					[listwords words=[tFields]]
+						[text scope=global][tPrefix][word]=[interpret][[word]][/interpret][/text]
+					[/listwords]
+				[/founditems]
+			[/else][/if]
+		[/search]
+	[/showif]
+
+	[return][tGood][/return]
+[/function]
+
+[function name=butFedExLink]
+	[text]tTracking=[if "[url]&[params_string][/url]"^"[url]&tracking=[/url]"][then][:local:tracking][/then][else][params_string][/else][/if][/text]
+	[text]tCountry=[if "[url]&[params_string][/url]"^"[url]&country=[/url]"][then][:local:country][/then][else]us[/else][/if][/text]
+	[text]tLanguage=[if "[url]&[params_string][/url]"^"[url]&language=[/url]"][then][:local:language][/then][else]english[/else][/if][/text]
+
+	[text]tURL=http://www.fedex.com/Tracking?cntry_code=[tCountry]&language=[tLanguage]&tracknumbers=[/text]
+	[listwords words=[tTracking]]
+		[text]tURL=[tURL][hideif [index]=1],[/hideif][word][/text]
+	[/listwords]
+
+	[return][tURL][/return]
+[/function]
+		
+[function name=_butFedExExtract]
+	[text]tReturn=[/text]
+	[text]tSource=[grep search=[%0D%0A]&replace=][unurl][params_string][/unurl][/grep][/text]
+
+	[listwords words=[url][tSource][/url]&delimiters=[url]<>[/url]][showif [url][tReturn][/url]=]
+		[text]tD=[delimiter][/text]
+		[showif [url][tD][/url]=[url]>[/url]][text]tReturn=[getchars start=1&end=999&trim=both][butTrim [word]][/getchars][/text][/showif]
+	[/showif][/listwords]
+	[return][tReturn][/return]
+[/function]
+[function name=butFedExTracking]
+	[text]tTracking=[if "[url]&[params_string][/url]"^"[url]&tracking=[/url]"][then][listwords words=[url][:local:tracking][/url]][showif [index]=1][word][/showif][/listwords][/then][else][params_string][/else][/if][/text]
+	[text]tCountry=[if "[url]&[params_string][/url]"^"[url]&country=[/url]"][then][:local:country][/then][else]us[/else][/if][/text]
+	[text]tLanguage=[if "[url]&[params_string][/url]"^"[url]&language=[/url]"][then][:local:language][/then][else]english[/else][/if][/text]
+
+[!]	[text scope=global]butFXURL=http://www.fedex.com/Tracking?template_type=print&cntry_code=[tCountry]&language=[tLanguage]&tracknumbers=[tTracking][/text][/!]
+[!]	[text scope=global]butFXURL=http://www.fedex.com/Tracking/Detail?template_type=print&cntry_code=us&language=english&clienttype=dotcom&trackNum=[tTracking][/text][/!]
+	[text scope=global]butFXURL=https://www.fedex.com/apps/fedextrack/index.html?action=track&tracknumbers=[tTracking]&locale=en_US&cntry_code=en[/text]
+	[text]tX=[butTCPFetch address=[url][butFXURL][/url]&startafter=[url]<DIV CLASS="detailresults">[/url]][/text]
+
+	[if "[url][tX][/url]"^"[url]Detailed Results[/url]"][then]
+		[showif [url][tX][/url]^[url]<!-- shipment info -->[/url]][text]tX=[middle startafter=[url]<!-- shipment info -->[/url]&endbefore=<!-- BEGIN Scan Activity -->][tX][/middle][/text][/showif]
+		[text]tU=[url][tX][/url][/text]
+
+		[text scope=global]butFXNumber=[showif [tU]^[url]Tracking no.:[/url]][middle startafter=[url]Tracking no.: [/url]&endbefore=</SPAN><DIV id="detail.emailNotification.link"][tX][/middle][/showif][/text]
+		[if "[tU]"^"undeliveredstatustop"][then]
+			[text scope=global]butFXStatus=[_butFedExExtract [middle startafter=[url]<DIV CLASS="undeliveredstatustop" style="clear:both"[/url]&endbefore=[url]<DIV CLASS="undeliveredstatus">[/url]][tX][/middle]][/text]
+			[text scope=global]butFXSignedBy=[/text]
+		[/then][else]
+			[text scope=global]butFXStatus=[showif [tU]^[url]Status[/url]][_butFedExExtract [middle startafter=[url]"clear:both">[/url]&endbefore=<DIV CLASS="undeliveredstatus">][tX][/middle]][/showif][/text]
+			[text scope=global]butFXSignedBy=[showif [tU]^[url]Signed for by[/url]][_butFedExExtract [middle startafter=[url]Signed for by:</DIV>&nbsp;[/url]&endbefore=detailshipdates][tX][/middle]][/showif][/text]
+		[/else][/if]
+
+		[text scope=global]butFXShipDate=[showif [tU]^[url]Ship date[/url]][_butFedExExtract [middle startafter=[url]detail.shipDateHelp" SRC="/Tracking/track/images/helpIcon.gif"></DIV> &nbsp;[/url]&endbefore=detaildestination][tX][/middle]][/showif][/text]
+		[text scope=global]butFXEstimatedDelivery=[showif [tU]^[url]Estimated delivery[/url]][_butFedExExtract [middle startafter=[url]detail.estDeliveryDateHelp" SRC="/Tracking/track/images/helpIcon.gif"></DIV> &nbsp;[/url]&endbefore=detaildestination][tX][/middle]][/showif][/text]
+		[text scope=global]butFXDeliveryDate=[showif [tU]^[url]Delivery date[/url]][_butFedExExtract [middle startafter=[url]deliveryDateHelp" SRC="/Tracking/track/images/helpIcon.gif"></DIV> &nbsp;[/url]&endbefore=detaildestination][tX][/middle]][/showif][/text]
+		[text scope=global]butFXReference=[showif [tU]^[url]Reference[/url]][_butFedExExtract [middle startafter=[url]class="datafield">Reference</DIV>[/url]&endbefore=split.shipment.summary][tX][/middle]][/showif][/text]
+		[text scope=global]butFXDestination=[showif [tU]^[url]detaildestination[/url]][_butFedExExtract [middle startafter=[url]CLASS="fielddata"[/url]][middle startafter=[url]CLASS="detaildestination[/url]&endbefore=detailspodsection][tX][/middle][/middle]][/showif][/text]
+		[text scope=global]butFXServiceType=[showif [tU]^[url]Service type[/url]][_butFedExExtract [middle startafter=[url]<DIV class="datafield">Service type</div>[/url]&endbefore=masterContentRight][tX][/middle]][/showif][/text]
+		[text]tReturn=[butTrue][/text]
+	[/then][else]
+		[text scope=global]butError=Failed to fetch tracking information from FedEx for tracking #[tTracking].[/text]
+		[text]tReturn=[butFalse][/text]
+	[/else][/if]
+
+	[return][tReturn][/return]
+[/function]
+		
+[function name=butUPSLink]
+	[text]tTracking=[if "[url]&[params_string][/url]"^"[url]&tracking=[/url]"][then][:local:tracking][/then][else][params_string][/else][/if][/text]
+	[text]tCountry=[if "[url]&[params_string][/url]"^"[url]&country=[/url]"][then][:local:country][/then][else]us[/else][/if][/text]
+	[text]tLanguage=[if "[url]&[params_string][/url]"^"[url]&language=[/url]"][then][:local:language][/then][else]eng[/else][/if][/text]
+
+	[text]tURL=http://wwwapps.ups.com/WebTracking/OnlineTool?TypeOfInquiryNumber=T&UPS_HTML_Version=3.0&IATA=[tCountry]&Lang=[tLanguage][/text]
+	[listwords words=[tTracking]]
+		[text]tURL=[tURL]&InquiryNumber[index]=[url][tTracking][/url][/text]
+	[/listwords]
+
+	[return][tURL][/return]
+[/function]
+		
+[function name=butShippingLink]
+	[text]tTracking=[butFunctionParam name=tracking&params=[url][params_string][/url]&default=[url][params_string][/url]][/text]
+	[text]tCarrier=[butFunctionParam name=carrier&params=[url][params_string][/url]&default=[if "[url][tTracking][/url]"~"1Z"][then]UPS[/then][else]FedEx[/else][/if]][/text]
+
+	[showif [url][tCarrier][/url]=][text]tCarrier=FedEx[/text][/showif]
+	[showif [url][tCarrier][/url]^UPS][text]tCarrier=UPS[/text][/showif]
+	[showif [url][tCarrier][/url]^FedEx][text]tCarrier=FedEx[/text][/showif]
+	[showif [url][tCarrier][/url]^USPS][text]tCarrier=USPS[/text][/showif]
+	[showif [url][tCarrier][/url]^DHL][text]tCarrier=DHL[/text][/showif]
+	
+	[switch value=[tCarrier]]
+	[case value=UPS]	[return][butUPSLink [tTracking]][/return][/case]
+	[case value=FedEx]	[return][butFedExLink [url][tTracking][/url]][/return][/case]
+	[case value=USPS]	[return]https://tools.usps.com/go/TrackConfirmAction.action?tLabels=[url][tTracking][/url][/return][/case]
+	[case value=DHL]	[return]http://www.dhl.com/en/express/tracking.html?AWB=[url][tTracking][/url]&brand=DHL[/return][/case]
+	[default]			[return]javascript:alert('No tracking link available for [tCarrier]');[/return][/default]
+	[/switch]
+[/function]
+
+[function name=butShortenString]
+	[text]uParams=[url][params_string][/url][/text]
+	[text]tString=[butFunctionParam name=string&params=[uParams]][/text]
+	[text]tMax=[butFunctionParam name=max&params=[uParams]&default=99999999][/text]
+	[text]tTailMax=[butFunctionParam name=tail&params=[uParams]&default=0][/text]
+	[text]tInsert=[butFunctionParam name=insert&params=[uParams]&default=[url]&hellip;[/url]][/text]
+	[text]tBreak=[butFunctionParam name=break&params=[uParams]&default=char][/text]
+
+	[text]tLength=[countchars][tString][/countchars][/text]
+	[if [tLength]>[tMax]][then]
+		[text]tLeadMax=[math][tMax]-[tTailMax][/math][/text]
+
+		[if "[tBreak]"="char"][then]
+			[text]tLead=[getchars start=1&end=[tLeadMax]][tString][/getchars][/text]
+			[text]tTail=[showif [tTailMax]>0][getchars start=1&end=[tTailMax]&from=end][tString][/getchars][/showif][/text]
+		[/then][else]
+			[if "[tBreak]"="word"][then]
+				[text]tWBreak=_%09_%0A_%0D_%0B_%1D_%20_[/text]
+			[/then][else]
+				[text]tWBreak=_[listchars chars=[url][tBreak][/url]][char]_[/listchars][/text]
+			[/else][/if]
+
+			[text]tEndX=0[/text]
+			[text]tLeadStartX=[math][tLength]-[tLeadMax]+1[/math][/text]
+
+			[listchars chars=[tString]&from=end&start=[tLeadStartX]][showif [tEndX]=0]
+				[showif [tWBreak]^_[url][char][/url]_]
+					[text]tEndX=[math][tLength]-[tLeadStartX]-[index]+1[/math][/text]
+					[break]
+				[/showif]
+			[/showif][/listchars]
+			[text]tLead=[getchars start=1&end=[tEndX]][tString][/getchars][/text]
+
+			[if [tTailMax]>0][then]
+				[text]tStartX=0[/text]
+				[listchars chars=[tString]&start=[math][tLength]-[tTailMax]-1[/math]][showif [tStartX]=0]
+					[showif [tWBreak]^_[url][char][/url]_]
+						[text]tStartX=[math][tLength]-[tTailMax]+[index]-1[/math][/text]
+						[break]
+					[/showif]
+				[/showif][/listchars]
+				[text]tTail=[getchars start=[tStartX]][tString][/getchars][/text]
+			[/then][else]
+				[text]tTail=[/text]
+			[/else][/if]
+		[/else][/if]
+		
+		[return][tLead][tInsert][tTail][/return]
+	[/then][else]
+		[return][tString][/return]
+	[/else][/if]
+[/function]
+
+[function name=butCountOccurrences]
+	[text]uParams=[url][params_string][/url][/text]
+	[text]tString=[butFunctionParam name=string&params=[uParams]][/text]
+	[text]uFind=[url][butFunctionParam name=find&params=[uParams]][/url][/text]
+	
+	[text]uC=%01[/text]
+	[text]tString=[grep search=[uC]&replace=][tString][/grep][/text]
+	[text]tString=[grep search=[uFind]&replace=[uC]][tString][/grep][/text]
+	[text]tString=[grep search=%5B^[uC]%5D&replace=][tString][/grep][/text]
+	[return][countchars][tString][/countchars][/return]
+[/function]
+
+[function name=butFileSize]
+	[text]uParams=[url][params_string][/url][/text]
+	[if "[uParams]"^"[url]=[/url]"][then]
+		[text]tBytes=[butFunctionParam name=bytes&params=[uParams]][/text]
+		[showif [tBytes]=]
+			[text]tPath=[butFunctionParam name=path&params=[uParams]][/text]
+			[hideif [url][tPath][/url]=]
+				[text]tBytes=[fileinfo [tPath]][size][/fileinfo][/text]
+			[/hideif]
+		[/showif]
+		[showif [tBytes]=][text]tBytes=0[/text][/showif]
+		[text]tPrecision=[butFunctionParam name=precision&params=[uParams]&default=1][/text]
+		[text]tKSize=[butFunctionParam name=ksize&params=[uParams]&default=1000][/text]
+		[text]tSpaced=[butFunctionParam name=spaced&params=[uParams]&default=F][/text]
+	[/then][else]
+		[text]tBytes=[params_string][/text]
+		[text]tPrecision=1[/text]
+		[text]tKSize=1000[/text]
+		[text]tSpaced=F[/text]
+	[/else][/if]		
+	
+	[if [tBytes]>[tKSize]][then]
+		[text]tBytes=[math][tBytes]/[tKSize][/math][/text]
+		[if [tBytes]>[tKSize]][then]
+			[text]tBytes=[math][tBytes]/[tKSize][/math][/text]
+			[if [tBytes]>[tKSize]][then]
+				[text]tBytes=[math][tBytes]/[tKSize][/math][/text]
+				[if [tBytes]>[tKSize]][then]
+					[text]tBytes=[math][tBytes]/[tKSize][/math][/text]
+					[if [tBytes]>[tKSize]][then]
+						[text]tBytes=[math][tBytes]/[tKSize][/math][/text]
+						[text]tUnits=PB[/text]
+					[/then][else]
+						[text]tUnits=TB[/text]
+					[/else][/if]
+				[/then][else]
+					[text]tUnits=GB[/text]
+				[/else][/if]
+			[/then][else]
+				[text]tUnits=MB[/text]
+			[/else][/if]
+		[/then][else]
+			[text]tUnits=KB[/text]
+		[/else][/if]
+	[/then][else]
+		[text]tUnits=B[/text]
+		[text]tPrecision=0[/text]
+	[/else][/if]
+	
+	[return][format 1.[tPrecision]f][tBytes][/format][showif [tSpaced]=T] [/showif][tUnits][/return]
+[/function]
+
+[function name=butCSVValue]
+[table name=map&fields=from,to]
+%0B	%0D
+%1D	%09
+%22	%22%22
+[/table]
+
+	[text]uValue=[url][convertchars table=map][params_string][/convertchars][/url][/text]
+	** If have comma or line ender, quote the value
+	[if ("[uValue]"^"%2C") | ("[uValue]"^"%0D") | ("[uValue]"^"%0A")][then]
+		[return]"[unurl][uValue][/unurl]"[/return]
+	[/then][else]
+		[return][unurl][uValue][/unurl][/return]
+	[/else][/if]
+[/function]
+
+[function name=butTextMap]
+[table name=_map&fields=from,to]
+%0B	<br />
+%0D	<br />
+%0A	<br />
+%1D	%09
+&	&amp;
+%AE	&reg;
+%A9	&copy;
+%99	&trade;
+<	&lt;
+>	&gt;
+%91	'
+%92	'
+%93	"
+%94	"
+–	&mdash;
+°	&deg;
+%E9	&eacute;
+[/table]
+	[return][convertchars table=_map][grep search=%0D[%0A]&replace=%0D][params_string][/grep][/convertchars][/return]
+[/function]
+
+[function name=butTextMapRaw]
+[table name=_map&fields=from,to]
+%0B	%0D
+%1D	%09
+[/table]
+[return][convertchars table=_map][grep search=%0D[%0A]&replace=%0D][params_string][/grep][/convertchars][/return]
+[/function]
+
+[function name=butHTMLMap]
+[table name=_map&fields=from,to]
+%0B	<br />
+%0D	<br />
+%0A	<br />
+%1D	%09
+%AE	&reg;
+%A9	&copy;
+%99	&trade;
+%91	'
+%92	'
+%93	"
+%94	"
+–	&mdash;
+°	&deg;
+[/table]
+[return][convertchars table=_map][grep search=%0D[%0A]&replace=%0D][params_string][/grep][/convertchars][/return]
+[/function]
+
+[function name=butHTMLNoBreakMap]
+[table name=_map&fields=from,to]
+%0B	%0D
+%1D	%09
+%AE	&reg;
+%A9	&copy;
+%99	&trade;
+%91	'
+%92	'
+%93	"
+%94	"
+–	&mdash;
+°	&deg;
+[/table]
+[return][convertchars table=_map][grep search=%0D[%0A]&replace=%0D][params_string][/grep][/convertchars][/return]
+[/function]
+
+[function name=butUTF8Map]
+[table name=_map&fields=from,to,char]
+%0B	&#013;
+%0D	&#013;
+%0A	&#010;
+%A0	%C2%A0	 
+%A1	%C2%A1	¡
+%A2	%C2%A2	¢
+%A3	%C2%A3	£
+%A4	%C2%A4	¤
+%A5	%C2%A5	¥
+%A6	%C2%A6	¦
+%A7	%C2%A7	§
+%A8	%C2%A8	¨
+%A9	%C2%A9	©
+%AA	%C2%AA	ª
+%AB	%C2%AB	«
+%AC	%C2%AC	¬
+%AD	%C2%AD	 
+%AE	%C2%AE	®
+%AF	%C2%AF	¯
+%B0	%C2%B0	°
+%B1	%C2%B1	±
+%B2	%C2%B2	²
+%B3	%C2%B3	³
+%B4	%C2%B4	´
+%B5	%C2%B5	µ
+%B6	%C2%B6	¶
+%B7	%C2%B7	·
+%B8	%C2%B8	¸
+%B9	%C2%B9	¹
+%BA	%C2%BA	º
+%BB	%C2%BB	»
+%BC	%C2%BC	¼
+%BD	%C2%BD	½
+%BE	%C2%BE	¾
+%BF	%C2%BF	¿
+%C0	%C3%80	À
+%C1	%C3%81	Á
+%C2	%C3%82	Â
+%C3	%C3%83	Ã
+%C4	%C3%84	Ä
+%C5	%C3%85	Å
+%C6	%C3%86	Æ
+%C7	%C3%87	Ç
+%C8	%C3%88	È
+%C9	%C3%89	É
+%CA	%C3%8A	Ê
+%CB	%C3%8B	Ë
+%CC	%C3%8C	Ì
+%CD	%C3%8D	Í
+%CE	%C3%8E	Î
+%CF	%C3%8F	Ï
+%D0	%C3%90	Ð
+%D1	%C3%91	Ñ
+%D2	%C3%92	Ò
+%D3	%C3%93	Ó
+%D4	%C3%94	Ô
+%D5	%C3%95	Õ
+%D6	%C3%96	Ö
+%D7	%C3%97	×
+%D8	%C3%98	Ø
+%D9	%C3%99	Ù
+%DA	%C3%9A	Ú
+%DB	%C3%9B	Û
+%DC	%C3%9C	Ü
+%DD	%C3%9D	Ý
+%DE	%C3%9E	Þ
+%DF	%C3%9F	ß
+%E0	%C3%A0	à
+%E1	%C3%A1	á
+%E2	%C3%A2	â
+%E3	%C3%A3	ã
+%E4	%C3%A4	ä
+%E5	%C3%A5	å
+%E6	%C3%A6	æ
+%E7	%C3%A7	ç
+%E8	%C3%A8	è
+%E9	%C3%A9	é
+%EA	%C3%AA	ê
+%EB	%C3%AB	ë
+%EC	%C3%AC	ì
+%ED	%C3%AD	í
+%EE	%C3%AE	î
+%EF	%C3%AF	ï
+%F0	%C3%B0	ð
+%F1	%C3%B1	ñ
+%F2	%C3%B2	ò
+%F3	%C3%B3	ó
+%F4	%C3%B4	ô
+%F5	%C3%B5	õ
+%F6	%C3%B6	ö
+%F7	%C3%B7	÷
+%F8	%C3%B8	ø
+%F9	%C3%B9	ù
+%FA	%C3%BA	ú
+%FB	%C3%BB	û
+%FC	%C3%BC	ü
+%FD	%C3%BD	ý
+%FE	%C3%BE	þ
+%FF	%C3%BF	ÿ
+[/table]
+[return][convertchars table=_map][params_string][/convertchars][/return]
+[/function]
+
+[function name=butEntityMap]
+[table name=_map&fields=from,to]
+%0B	&#013;
+%0D	&#013;
+%0A	&#010;
+%1D	%09
+%27	&apos;
+%22	&quot;
+%3C	&lt;
+%3E	&gt;
+%91	&lsquo;
+%92	&rsquo;
+%93	&ldquo;
+%94	&rdquo;
+%99	&trade;
+%A0	&nbsp;
+%A1	&iexcl;
+%A2	&cent;
+%A3	&pound;
+%A4	&curren;
+%A5	&yen;
+%A6	&brvbar;
+%A7	&sect;
+%A8	&uml;
+%A9	&copy;
+%AA	&ordf;
+%AB	&laquo;
+%AC	&not;
+%AD	&shy;
+%AE	&reg;
+%AF	&macr;
+%B0	&deg;
+%B1	&plusmn;
+%B2	&sup2;
+%B3	&sup3;
+%B4	&acute;
+%B5	&micro;
+%B6	&para;
+%B7	&middot;
+%B8	&cedil;
+%B9	&sup1;
+%BA	&ordm;
+%BB	&raquo;
+%BC	&frac14;
+%BD	&frac12;
+%BE	&frac34;
+%BF	&iquest;
+%C0	&Agrave;
+%C1	&Aacute;
+%C2	&Acirc;
+%C3	&Atilde;
+%C4	&Auml;
+%C5	&Aring;
+%C6	&AElig;
+%C7	&Ccedil;
+%C8	&Egrave;
+%C9	&Eacute;
+%CA	&Ecirc;
+%CB	&Euml;
+%CC	&Igrave;
+%CD	&Iacute;
+%CE	&Icirc;
+%CF	&Iuml;
+%D0	&ETH;
+%D1	&Ntilde;
+%D2	&Ograve;
+%D3	&Oacute;
+%D4	&Ocirc;
+%D5	&Otilde;
+%D6	&Ouml;
+%D7	&times;
+%D8	&Oslash;
+%D9	&Ugrave;
+%DA	&Uacute;
+%DB	&Ucirc;
+%DC	&Uuml;
+%DD	&Yacute;
+%DE	&THORN;
+%DF	&szlig;
+%E0	&agrave;
+%E1	&aacute;
+%E2	&acirc;
+%E3	&atilde;
+%E4	&auml;
+%E5	&aring;
+%E6	&aelig;
+%E7	&ccedil;
+%E8	&egrave;
+%E9	&eacute;
+%EA	&ecirc;
+%EB	&euml;
+%EC	&igrave;
+%ED	&iacute;
+%EE	&icirc;
+%EF	&iuml;
+%F0	&eth;
+%F1	&ntilde;
+%F2	&ograve;
+%F3	&oacute;
+%F4	&ocirc;
+%F5	&otilde;
+%F6	&ouml;
+%F7	&divide;
+%F8	&oslash;
+%F9	&ugrave;
+%FA	&uacute;
+%FB	&ucirc;
+%FC	&uuml;
+%FD	&yacute;
+%FE	&thorn;
+%FF	&yuml;
+[/table]
+[return][grep search=%0B&replace=[url]<br />[/url]][convertchars table=_map][grep search=%26&replace=[url]&amp;[/url]][grep search=[url]%u2019[/url]&replace=%92][grep search=[url]%u201D[/url]&replace=%94][params_string][/grep][/grep][/grep][/convertchars][/grep][/return]
+[/function]
+
+[function name=butEditMap]
+[return][grep search=%0B&replace=[url]&#013;[/url]][butEntityMap [params_string]][/grep][/return]
+[/function]
+
+[function name=butSmartMap]
+	[text]uParams=[url][params_string][/url][/text]
+	[if ("[uParams]"^"[url]<[/url]") & ("[uParams]"^"[url]>[/url]")][then]
+		[if ("[uParams]"^"[url]<br[/url]") | ("[uParams]"^"[url]<p[/url]") | ("[uParams]"^"[url]<table[/url]")][then]
+			[return][butHTMLNoBreakMap [params_string]][/return]
+		[/then][else]
+			[return][butHTMLMap [params_string]][/return]
+		[/else][/if]
+	[/then][else]
+		[return][butTextMap [params_string]][/return]
+	[/else][/if]
+[/function]
+
+** brainutility.lib **
+[/text][text]butNull=[/text][/then][/if]
